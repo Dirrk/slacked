@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  nav.navbar.navbar-inverse.navbar-fixed-top
+    .container-fluid
+      .navbar-header
+        a.navbar-brand(href="/") Slacked
+
+  .container-fluid
+    .row
+      .col-sm-3.col-md-2.sidebar
+        ul.nav.nav-sidebar
+          for chan in channels
+            li
+              if chan.locationId == channel
+                a.highlight(href="/channel/#{chan.locationId}") #{chan.name}
+              else
+                a(href="/channel/#{chan.locationId}") #{chan.name}
+
+      .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
+          .container-fluid.msgContainer
+            for msg in messages
+              .message
+                p [#{msg.ts}] &lt#{msg.name}&gt #{msg.msg}
+
+            .message
+              a(href="/channel/#{channel}?start=#{lastIndex}") Load next page

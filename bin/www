@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+var debug = require('debug')('slacked');
+var appArgs = require('minimist')(process.argv.slice(2));
+var fs = require('fs');
+global.appConfig = {};
+
+
+// Setup config
+if (appArgs.c && fs.existsSync(appArgs.c)) {
+  global.appConfig = require(appArgs.c);
+} else if (fs.existsSync('../config.json')) {
+  global.appConfig = require('../config.json');
+} else {
+  global.appConfig = { "port": 3000, "debug": true };
+}
+
+// Require custom modules
+var slackService = require('../lib/slackService');
+var app = require('../app');
+
+// Setup custom modules
+if (appArgs.p) {
+  app.set('port', appArgs.port || appArgs.p);
+} else {
+  app.set('port', 3000);
+}
+
+//    Start services
+// Web Service
+var server = app.listen(app.get('port'), function() {
+  debug('Express server listening on port ' + server.address().port);
+});
+
+// Slack Service
+slackService.start();
+
+// Testing Services
+var sqlUtil = require('../lib/sqlUtil');
+sqlUtil.testSQL();
