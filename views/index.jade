@@ -22,6 +22,6 @@ block content
             for msg in messages
               .message
                 p [#{msg.ts}] &lt#{msg.name}&gt #{msg.msg}
-
-            .message
-              a(href="/channel/#{channel}?start=#{lastIndex}") Load next page
+            if messages.length >= 100
+              .message
+                a(href="/channel/#{channel}?start=#{lastIndex}") Load next page

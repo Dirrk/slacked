@@ -5,13 +5,15 @@ var fs = require('fs');
 global.appConfig = {};
 
 
+
+
 // Setup config
 if (appArgs.c && fs.existsSync(appArgs.c)) {
   global.appConfig = require(appArgs.c);
 } else if (fs.existsSync('../config.json')) {
   global.appConfig = require('../config.json');
 } else {
-  global.appConfig = { "port": 3000, "debug": true };
+  global.appConfig = { "port": 3000, "debug": true, "token": "SLACK_TOKEN" };
 }
 
 // Require custom modules
