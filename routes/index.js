@@ -5,23 +5,13 @@ var slackServe = require('../lib/slackService');
 
 
 
-
-
 module.exports = router;
 router.get('/', function(req, res) {
-  res.render('index',
-             {
-               title: 'Slacked',
-               channels: slackServe.getChannels(),
-               groups: slackServe.getGroups(),
-               messages: []
-             }
-  );
+    res.render('location');
 });
 
 
 router.get('/debug', function(req, res) {
-
     res.render('location');
 
 });

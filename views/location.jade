@@ -2,7 +2,7 @@
    Created by Dirrk on 12/11/2014.
 
 doctype html
-html
+html(ng-app="ngLocationSlackedApp")
    head
       title="Slacked"
       link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css")
@@ -15,11 +15,12 @@ html
       script(src="/javascripts/location.js")
       script(src="/javascripts/controllers.js")
 
-   body(ng-app="ngLocationSlackedApp")
+
+   body(ng-controller="ngMainController")
       nav.navbar.navbar-inverse.navbar-fixed-top(role="navigation")
          .container-fluid
             .navbar-header
-               a.navbar-brand(href="/") Slacked
+               a.navbar-brand(href="/#") Slacked
 
       .container-fluid
          .row
@@ -27,14 +28,16 @@ html
                h6 Channels
                ul#chanSideBar.nav.nav-sidebar
                   li(ng-repeat="chan in channels")
-                     a(href="#/history/{{chan.locationId}}") {{chan.name}}
+                     a(href="#/history/channel/{{chan.locationId}}", ng-click="loadChannel(true, chan.locationId)") {{chan.name}}
                br
                h6 Groups
                ul#groupSideBar.nav.nav-sidebar
                   li(ng-repeat="group in groups")
-                     a(href="#/history/{{group.locationId}}") {{group.name}}
+                     a(href="#/history/group/{{group.locationId}}", ng-click="loadChannel(false, group.locationId)") {{group.name}}
 
             .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
+               .container-fluid(ng-view)
+            //
                .container-fluid(ng-controller="ngMessageViewer")
                   .msgContainer
                      .message(ng-repeat="msg in messages")

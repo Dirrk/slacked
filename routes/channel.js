@@ -5,33 +5,42 @@
 var express = require('express');
 var router = express.Router();
 var sqlUtil = require('../lib/sqlUtil');
+var slackUtil = require('../lib/slackUtil');
 var slackService = require('../lib/slackService');
 
-router.get('/:id', channelHandler);
+router.get('/:id', channelHandler); // /channel/id
+router.get('/', channelsHandler); // /channel/
+
+function channelsHandler(req, res) {
+
+    if (req.user && req.user.loggedIn === true) {
+        // var userId = slackUtil.getCurrentRequestingUser(req);
+        // TODO get Specific Channel info
+        res.json(slackService.getChannels());
+    } else {
+        res.json(slackService.getChannels());
+    }
+};
 
 function channelHandler(req, res) {
 
-    var channelId = req.params.id;
-    var start = req.query.start || new Date().getTime();
 
-    sqlUtil.getChannelHistory(start,channelId,function (err, data) {
+    var config = {
+        locationId: req.params.id || null,
+        start: req.query.start || new Date().getTime(),
+        isChannel: true,
+        userId: slackUtil.getCurrentRequestingUser(req)
+    };
 
-        console.log(slackService.getGroups("U02HA00AX"));
+    sqlUtil.getLocationHistory(config, function (err, data) {
 
-        if (!err) {
-
-            if (data.length && data.length > 0) {
-                for (var i =0; i < data.length; i++) {
-                    data[i].ts = makePrettyDate(data[i].msgStamp);
-                }
-                var lastIndex = data[data.length - 1].msgStamp;
-
-                res.render('index', { title: "Slacked", lastIndex: lastIndex, channel: channelId, groups: slackService.getGroups("U02HA00AX"), channels: slackService.getChannels(), messages: data});
-            } else {
-                res.render('index', { title: "Slacked", channel: channelId, channels: slackService.getChannels(), groups: slackService.getGroups("U02HA00AX"), messages: [{ts: "Now", name: "Slacked", msg: "No data in channel"}]});
-            }
+        if (data) {
+            res.json(data);
         } else {
-            res.status(500).send(err);
+            if (err) {
+                console.error(err);
+            }
+            res.json([])
         }
     });
 
