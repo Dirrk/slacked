@@ -5,8 +5,8 @@
 (function(angular) {
 
 
-    var DEFAULT_MESSAGES = [{ts: null, name: "Slacked", msg: "No messages"}];
-    var ERROR_MESSAGE = [{ts: null, name: "Error", msg: "Error loading data"}];
+    var DEFAULT_MESSAGES = [{msgStamp: null, name: "Slacked", msg: "No messages"}];
+    var ERROR_MESSAGE = [{msgStamp: null, name: "Error", msg: "Error loading data"}];
     var DEFAULT_CHANNELS = [];
     var DEFAULT_GROUPS = [];
 
@@ -20,7 +20,7 @@
                                      "$route",
                                      "$routeParams",
                                      "$location",
-                                     function ($scope, $route, $routeParams, $location) {
+                                     function ($scope, $route, $routeParams, $location, $http) {
                                          $scope.$route = $route;
                                          $scope.$location = $location;
                                          $scope.$routeParams = $routeParams;
@@ -114,7 +114,14 @@
                           templateUrl: "partials/messages.html",
                           controller:  "locationHistoryController"
                       }
-             );
+             ).when('/login', {
+                        templateUrl: "partials/login.html",
+                        controller: "loginController"
+             }).when('/',
+                     {
+                        templateUrl: "partials/index.html",
+                        controller: "indexController"
+             }).otherwise({ redirectTo: "/" });
          }
         ]
     );
@@ -144,13 +151,14 @@
 
         if (data && data.length && data.length > 0) {
 
-            return data.map(function (msg) {
-                var tmp = tsToDateString(msg.ts);
-                msg.date = tmp.date;
-                msg.time = tmp.time;
-                return msg;
+            for (var i = 0; i < data.length; i++) {
+                var tmp = tsToDateString(data[i].msgStamp);
+                data[i].date = tmp.date;
+                data[i].time = tmp.time;
+
             }
-            );
+            console.log(data);
+            return data;
         } else {
             return cleanMessages(DEFAULT_MESSAGES);
         }
