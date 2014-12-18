@@ -13,7 +13,15 @@ router.get('/', function(req, res) {
              {
                title: 'Slacked',
                channels: slackServe.getChannels(),
-               messages: [{ts: "Now", name: "Slacked", msg: "Select a channel to begin"}]
+               groups: slackServe.getGroups(),
+               messages: []
              }
   );
+});
+
+
+router.get('/debug', function(req, res) {
+
+    res.render('location');
+
 });

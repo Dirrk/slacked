@@ -1,5 +1,5 @@
 /**
- * Created by Derek Rada on 12/10/2014.
+ * Created by Derek Rada on 12/18/2014.
  */
 
 var express = require('express');
@@ -7,9 +7,22 @@ var router = express.Router();
 var sqlUtil = require('../lib/sqlUtil');
 var slackService = require('../lib/slackService');
 
-router.get('/:id', channelHandler);
+// match the id first
+router.get('s', groupHandler); // /groups
+router.get('/:id', groupsHandler); // /group/id
 
-function channelHandler(req, res) {
+
+function groupsHandler(req, res) {
+
+    var myUserId = null;
+    if (req.user && req.user.loggedIn === true) {
+      myUserId = req.user.id;
+    }
+    sqlUtil.getGroupHistory(myUserId, )
+
+};
+
+function groupHandler(req, res) {
 
     var channelId = req.params.id;
     var start = req.query.start || new Date().getTime();
@@ -44,3 +57,4 @@ function makePrettyDate(inDate) {
 }
 
 module.exports = router;
+
