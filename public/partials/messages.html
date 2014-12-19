@@ -3,5 +3,10 @@
       <div class="message" ng-repeat="msg in messages">
          <p data-toggle="tooltip" data-placement="top" title="{{msg.date}}"> [{{msg.time}}] &lt{{msg.name}}&gt {{msg.msg}}</p>
       </div>
+      <div class="message" ng-if="messages.length > 99">
+         <a href="#/history/{{locationType}}/{{locationId}}?start={{lastStamp}}">
+            Load next page
+         </a>
+      </div>
    </div>
 </div>

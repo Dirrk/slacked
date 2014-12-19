@@ -21,6 +21,14 @@ html(ng-app="ngLocationSlackedApp")
          .container-fluid
             .navbar-header
                a.navbar-brand(href="/#/") Slacked
+            ul.nav.navbar-nav.navbar-right
+               li
+                  a(href="#/user") {{user.displayName}}
+            form.navbar-form.navbar-right.searchBox(role="search")
+               .form-group
+                  input.form-control(type="text" placeholder="slacked" ng-model="searchTerm")
+               button.btn.btn-primary(type="submit", ng-click="searchFor(searchTerm)") Search
+
 
       .container-fluid
          .row

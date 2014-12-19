@@ -24,6 +24,21 @@
                                          $scope.$route = $route;
                                          $scope.$location = $location;
                                          $scope.$routeParams = $routeParams;
+
+                                         $scope.user = {
+                                             loggedIn: false,
+                                             userId: null,
+                                             displayName: "Login"
+                                         };
+
+                                         $scope.searchTerm = "";
+
+                                         $scope.searchFor = function(term) {
+                                             console.log(term);
+                                         };
+
+                                         // $http.get("/user")
+
                                      }
                                     ]
     );
@@ -86,12 +101,15 @@
                                                                       console.log("Inside LocationHistoryController");
                                                                       console.log($routeParams);
                                                                       $scope.params = $routeParams;
-
+                                                                      $scope.locationType = $routeParams.locationType;
+                                                                      $scope.locationId = $routeParams.locationId;
                                                                       $scope.messages = DEFAULT_MESSAGES;
+                                                                      $scope.lastStamp = 0;
                                                                       $http.get(makeUrl($scope.params))
                                                                           .success(
                                                                           function (data) {
                                                                               $scope.messages = cleanMessages(data) || cleanMessages(DEFAULT_MESSAGES);
+                                                                              $scope.lastStamp = $scope.messages[$scope.messages.length - 1].msgStamp;
                                                                           }
                                                                       ).error(
                                                                           function (data) {
@@ -114,9 +132,9 @@
                           templateUrl: "partials/messages.html",
                           controller:  "locationHistoryController"
                       }
-             ).when('/login', {
-                        templateUrl: "partials/login.html",
-                        controller: "loginController"
+             ).when('/user', {
+                        templateUrl: "partials/user.html",
+                        controller: "userController"
              }).when('/',
                      {
                         templateUrl: "partials/index.html",
@@ -139,6 +157,15 @@
 
          });
          */
+    }]);
+
+    ngLocationSlackedApp.controller('userController', ["$scope", "$http", function userController($scope, $http) {
+
+
+    }]);
+
+    ngLocationSlackedApp.controller('indexController', ["$scope", "$http", function indexController($scope, $http) {
+
     }]);
 
 
@@ -174,7 +201,10 @@
         if (!param.locationType) {
             param.locationType = "channel";
         }
-        return "/" + param.locationType + "/" + param.locationId;
+        if (param.start == 0 || param.start == "0" || param.start == null) {
+            return "/" + param.locationType + "/" + param.locationId;
+        }
+        return "/" + param.locationType + "/" + param.locationId + "?start=" + param.start;
     }
 
 
