@@ -24,8 +24,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// temporarily use memory session
+
 app.use('/', routes);
-app.use('/users', users);
+app.use('/user', users);
 app.use('/channel', channel);
 app.use('/group', group);
 

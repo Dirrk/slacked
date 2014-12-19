@@ -1,5 +1,15 @@
 <div class="container-fluid">
     <div class="indexContainer">
-        <h3>Please select a channel to start using</h3>
+        <div class="row">
+            <h3>Login</h3>
+            <div id="userLogin" class="col-lg-4">
+                <span>User:</span>
+                <select id="userDropDown" class="chosen-select">
+                    <option ng-repeat="users in allUsers" value="users.userId">
+                        {{users.name}}
+                    </option>
+                </select>
+            </div>
+        </div>
     </div>
 </div>

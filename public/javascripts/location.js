@@ -139,6 +139,10 @@
                      {
                         templateUrl: "partials/index.html",
                         controller: "indexController"
+             }).when('/search/:locationId/:query',
+                     {
+                         templateUrl: "partials/messages.html",
+                         controller: "searchController"
              }).otherwise({ redirectTo: "/" });
          }
         ]
@@ -159,14 +163,41 @@
          */
     }]);
 
-    ngLocationSlackedApp.controller('userController', ["$scope", "$http", function userController($scope, $http) {
+    ngLocationSlackedApp.controller('userController', ["$scope", "$routeParams", "$http", "$location", function userController($scope, $routeParams, $http, $location) {
 
+       if ($scope.user && $scope.user.loggedIn === true) {
+            console.log("user is logged in");
+
+       } else {
+           $location.path('/?action=login');
+       }
+    }]);
+
+    ngLocationSlackedApp.controller('searchController', ["$scope", "$http", function searchController($scope, $http) {
 
     }]);
 
-    ngLocationSlackedApp.controller('indexController', ["$scope", "$http", function indexController($scope, $http) {
+    ngLocationSlackedApp.controller('indexController', ["$scope", "$routeParams", "$http", "$location", function indexController($scope, $routeParams, $http, $location) {
 
+        // user is logged in load user page instead of the login / sign up page
+        if ($scope.user && $scope.user.loggedIn === true) {
+            console.log("redirecting user to '/user'");
+            $location.path('/user');
+
+        } else {
+
+            $scope.allUsers = [{ userId: "abc123", name: "derek rada" }];
+            $scope.currentUsers = [];
+            $http.get("/user/")
+                .success(
+                    function (data) {
+                        $scope.allUsers = data;
+                        $(".chosen-select").chosen({allow_single_deselect: false, disable_search_threshold: 10, width: "50%"});
+                    }
+            );
+        }
     }]);
+
 
 
     /***
