@@ -206,8 +206,8 @@
             // used as temporary storage to authenticate and control flow
             $scope.authData = {
                 token: "",
-                step2: true,
-                timedOut: false,
+                step2: false,
+                timedWait: false,
                 selectedUser: $scope.globes._profile.userId
             };
 
@@ -222,16 +222,56 @@
 
             $("#userDropDown").on("change", function () {
                 setTimeout(function() {
+                    $scope.$apply();
                     window.localStorage.setItem("slacked:user_selected", $scope.authData.selectedUser);
                 }, 250);
             });
 
             $scope.startAuthProcess = function() {
-                console.log("Test Start");
                 $scope.globes._profile.userId = $scope.authData.selectedUser;
+                console.log("Begging auth process");
+
+                $http.get('/user/auth?userId=' + $scope.globes._profile.userId).
+                    success(
+                    function (data) {
+                        if (data && data.success === true) {
+                            $scope.authData.step2 = true;
+                            $scope.authData.timedWait = true;
+
+                            setTimeout(function () {
+                                $scope.authData.timedWait = false;
+                                $scope.$apply();
+                            }, 60000);
+                        } else {
+                            console.log("Bad request");
+                            // TODO notify user
+                        }
+                    }
+                ).error(
+                    function (data) {
+                        console.log("Error request");
+                        // TODO notify user
+                    }
+                )
             };
 
             $scope.finishAuthProcess = function(token) {
+                var token = token || $scope.authData.token;
+                if (token && token.length > 0) {
+
+                    $http.get("/user/auth/" + $scope.globes._profile.userId + "?token=" + token)
+                        .success(
+                            function (data) {
+                                if (data && data.success == true) {
+
+                                    $scope.token = "";
+                                    $scope.globes._profile.userId = data.userId;
+                                    $scope.globes._profile.loggedIn = true;
+                                    $scope.globes._profile.displayName = "blah"; // TODO FIX
+                                }
+                            }
+                    );
+                }
                 console.log(token);
             };
 

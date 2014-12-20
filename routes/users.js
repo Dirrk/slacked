@@ -38,9 +38,8 @@ router.get('/auth', function(req, res) {
     // TODO Need session store implemented
     // req.session.token = token;
 
-
-
     slackService.sendToken(req.query.userId, token);
+
     users[req.query.userId] = {
       token: token
     };
