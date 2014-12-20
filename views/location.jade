@@ -25,11 +25,11 @@ html(ng-app="ngLocationSlackedApp")
                a.navbar-brand(href="/#/") Slacked
             ul.nav.navbar-nav.navbar-right
                li
-                  a(href="#/user") {{user.displayName}}
+                  a(href="#/user") {{globes._profile.displayName}}
             form.navbar-form.navbar-right.searchBox(role="search")
                .form-group
-                  input.form-control(type="text" placeholder="slacked" ng-model="searchTerm")
-               button.btn.btn-primary(type="submit", ng-click="searchFor(searchTerm)") Search
+                  input.form-control(type="text" placeholder="slacked" ng-model="searchData.term")
+               button.btn.btn-primary(type="submit", ng-click="searchFor(searchData.term)") Search
 
       .container-fluid
          .row
@@ -37,15 +37,16 @@ html(ng-app="ngLocationSlackedApp")
                h6 Channels
                ul#chanSideBar.nav.nav-sidebar
                   li(ng-repeat="chan in channels")
-                     a(href="#/history/channel/{{chan.locationId}}", ng-click="loadChannel(true, chan.locationId)") {{chan.name}}
+                     a(href="#/history/channel/{{chan.locationId}}") {{chan.name}}
                br
                h6 Groups
                ul#groupSideBar.nav.nav-sidebar
                   li(ng-repeat="group in groups")
-                     a(href="#/history/group/{{group.locationId}}", ng-click="loadChannel(false, group.locationId)") {{group.name}}
+                     a(href="#/history/group/{{group.locationId}}") {{group.name}}
 
             .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
                .container-fluid(ng-view)
+         #hiddenDiv(style="display: none;", data-user="{{globes._profile.userId}}")
             //
                .container-fluid(ng-controller="ngMessageViewer")
                   .msgContainer

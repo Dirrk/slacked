@@ -25,17 +25,33 @@
                                          $scope.$location = $location;
                                          $scope.$routeParams = $routeParams;
 
-                                         $scope.user = {
+                                         var user = {
                                              loggedIn: false,
                                              userId: null,
                                              displayName: "Login"
                                          };
 
-                                         $scope.searchTerm = "";
+
+                                         $scope.searchData = {
+                                             term: "",
+                                             startDate: new Date().getTime() - 3600000, // 1 hour
+                                             endDate: new Date().getTime(),
+                                             locations: []
+                                         };
 
                                          $scope.searchFor = function(term) {
                                              console.log(term);
                                          };
+
+
+                                         $scope.globes = {
+                                           _users: [],
+                                           _channels: [],
+                                           _groups: [],
+                                           _profile: user
+                                         };
+
+
 
                                          // $http.get("/user")
 
@@ -62,7 +78,7 @@
                                              .success(
                                              function (data) {
                                                  $scope.channels = data;
-
+                                                 $scope.globes._channels = data;
                                              }
                                          ).error(
                                              function (data, status) {
@@ -75,6 +91,7 @@
                                              .success(
                                              function (data) {
                                                  $scope.groups = data;
+                                                 $scope.globes._groups = data;
                                              }
                                          )
                                              .error(
@@ -180,20 +197,58 @@
     ngLocationSlackedApp.controller('indexController', ["$scope", "$routeParams", "$http", "$location", function indexController($scope, $routeParams, $http, $location) {
 
         // user is logged in load user page instead of the login / sign up page
-        if ($scope.user && $scope.user.loggedIn === true) {
+        if ($scope.globes._profile && $scope.globes._profile.loggedIn === true) {
             console.log("redirecting user to '/user'");
             $location.path('/user');
 
         } else {
 
-            $scope.allUsers = [{ userId: "abc123", name: "derek rada" }];
-            $scope.currentUsers = [];
+            // used as temporary storage to authenticate and control flow
+            $scope.authData = {
+                token: "",
+                step2: true,
+                timedOut: false,
+                selectedUser: $scope.globes._profile.userId
+            };
+
+            var lastSelected = window.localStorage.getItem("slacked:user_selected");
+            if (lastSelected) {
+                $scope.authData.selectedUser = lastSelected;
+            }
+
+
+            // Setup chosen input box
+            $("#userDropDown").chosen({allow_single_deselect: false, disable_search_threshold: 5, width: "275px", placeholder_text_single: "Select user"});
+
+            $("#userDropDown").on("change", function () {
+                setTimeout(function() {
+                    window.localStorage.setItem("slacked:user_selected", $scope.authData.selectedUser);
+                }, 250);
+            });
+
+            $scope.startAuthProcess = function() {
+                console.log("Test Start");
+                $scope.globes._profile.userId = $scope.authData.selectedUser;
+            };
+
+            $scope.finishAuthProcess = function(token) {
+                console.log(token);
+            };
+
+            // get users
+            $scope.allUsers = [];
+
             $http.get("/user/")
                 .success(
-                    function (data) {
-                        $scope.allUsers = data;
-                        $(".chosen-select").chosen({allow_single_deselect: false, disable_search_threshold: 10, width: "50%"});
-                    }
+                function (data) {
+                    console.log("Users: ", data);
+                    $scope.allUsers = data;
+                    $scope.globes._users = data;
+                    setTimeout(function () {
+
+                        $("#userDropDown").trigger("chosen:updated");
+                    }, 250);
+                }
             );
         }
     }]);

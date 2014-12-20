@@ -1,14 +1,36 @@
 <div class="container-fluid">
     <div class="indexContainer">
-        <div class="row">
-            <h3>Login</h3>
-            <div id="userLogin" class="col-lg-4">
-                <span>User:</span>
-                <select id="userDropDown" class="chosen-select">
-                    <option ng-repeat="users in allUsers" value="users.userId">
-                        {{users.name}}
-                    </option>
-                </select>
+        <div class="row" ng-hide="globes._profile.loggedIn">
+            <div id="userLogin" class="col-lg-6 col-md-8 col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            Login
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="col-md-10 col-md-offset-2">
+                            <form class="form-horizontal " role="form">
+                                <div class="form-group">
+                                    <div class="input-group input-group-md">
+
+                                        <button style="float: right;" data-bot="{{globes._profile}}" ng-click="startAuthProcess()" class="btn btn-primary btn-sm btn-spaced">Login</button>
+                                        <select style="float: left;" id="userDropDown" class="chosen-select" ng-options="item.userId as item.name for item in allUsers" ng-model="authData.selectedUser">
+                                            <option></option>
+                                        </select>
+
+                                    </div>
+                                </div>
+                                <div class="form-group" ng-show="authData.step2">
+                                    <div class="input-group input-group-md">
+                                        <input style="width: 275px;" id="authDataTokenInput" type="text" ng-model="authData.token" class="form-control" placeholder="Token">
+                                        <button style="margin-left: 10px;" class="btn btn-primary btn-sm" id="authDataVerifyButton" ng-click="finishAuthProcess(authData.token)">Verify</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
