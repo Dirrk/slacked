@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-var debug = require('debug')('slacked');
 var appArgs = require('minimist')(process.argv.slice(2));
 var fs = require('fs');
 global.appConfig = {};
 
 
 // Setup config
+// This is ugly needs changing
 if (appArgs.c) {
   try {
     global.appConfig = require(appArgs.c);
@@ -24,10 +24,16 @@ if (appArgs.c) {
   }
 }
 
-// Require custom modules
-var slackService = require('../lib/slackService');
-var app = require('../app');
+// Services
 var redisCache = require('../lib/redisCache');
+var slackService = require('../lib/slackService');
+
+redisCache.start();
+slackService.start();
+
+
+var app = require('../app');
+
 
 // Setup custom modules
 if (appArgs.p) {
@@ -39,14 +45,8 @@ if (appArgs.p) {
 // Start services
 // Web Service
 var server = app.listen(app.get('port'), function() {
-  debug('Express server listening on port ' + server.address().port);
+  console.log('Express server listening on port ' + server.address().port);
 });
-
-// Slack Service
-slackService.start();
-
-// Redis Service
-redisCache.start();
 
 // Testing Services
 var sqlUtil = require('../lib/sqlUtil');
