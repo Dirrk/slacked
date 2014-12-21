@@ -5,20 +5,29 @@ var fs = require('fs');
 global.appConfig = {};
 
 
-
-
 // Setup config
-if (appArgs.c && fs.existsSync(appArgs.c)) {
-  global.appConfig = require(appArgs.c);
-} else if (fs.existsSync('../config.json')) {
-  global.appConfig = require('../config.json');
+if (appArgs.c) {
+  try {
+    global.appConfig = require(appArgs.c);
+  } catch (e) {
+    try {
+      global.appConfig = require('../config.json');
+    } catch (e) {
+      global.appConfig = {"port": 3000, "debug": true, "token": "", redis: {}};
+    }
+  }
 } else {
-  global.appConfig = { "port": 3000, "debug": true, "token": "SLACK_TOKEN" };
+  try {
+    global.appConfig = require('../config.json');
+  } catch (e) {
+    global.appConfig = {"port": 3000, "debug": true, "token": "", redis: {}};
+  }
 }
 
 // Require custom modules
 var slackService = require('../lib/slackService');
 var app = require('../app');
+var redisCache = require('../lib/redisCache');
 
 // Setup custom modules
 if (appArgs.p) {
@@ -27,7 +36,7 @@ if (appArgs.p) {
   app.set('port', 3000);
 }
 
-//    Start services
+// Start services
 // Web Service
 var server = app.listen(app.get('port'), function() {
   debug('Express server listening on port ' + server.address().port);
@@ -36,6 +45,10 @@ var server = app.listen(app.get('port'), function() {
 // Slack Service
 slackService.start();
 
+// Redis Service
+redisCache.start();
+
 // Testing Services
 var sqlUtil = require('../lib/sqlUtil');
 sqlUtil.testSQL();
+redisCache.test();
