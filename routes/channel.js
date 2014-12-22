@@ -7,19 +7,24 @@ var router = express.Router();
 var sqlUtil = require('../lib/sqlUtil');
 var slackUtil = require('../lib/slackUtil');
 var slackService = require('../lib/slackService');
+var userAuth = require('../middleware/userAuthentication');
 
+
+router.use(userAuth);
 router.get('/:id', channelHandler); // /channel/id
 router.get('/', channelsHandler); // /channel/
 
 function channelsHandler(req, res) {
 
-    if (req.user && req.user.loggedIn === true) {
-        // var userId = slackUtil.getCurrentRequestingUser(req);
-        // TODO get Specific Channel info
-        res.json(slackService.getChannels());
-    } else {
-        res.json(slackService.getChannels());
-    }
+    slackService.getChannels(req.session.userId,
+                             function (channels) {
+                                 res.json(channels.map(function (chan) {
+                                     return {locationId: chan.locationId, name: chan.name};
+                                 }
+                                 )
+                                 );
+                             }
+    );
 };
 
 function channelHandler(req, res) {
@@ -46,10 +51,5 @@ function channelHandler(req, res) {
 
 };
 
-function makePrettyDate(inDate) {
-
-    var aDate = new Date(inDate);
-    return (aDate.getMonth() + 1) + "/" + aDate.getDate() + "/" + aDate.getUTCFullYear() + " " + aDate.getHours() + ":" + aDate.getMinutes();
-}
 
 module.exports = router;

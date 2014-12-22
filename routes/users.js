@@ -13,64 +13,93 @@ router.get('/', function(req, res) {
   res.json(slackService.getUsers());
 });
 
+
 router.get('/auth', function(req, res) {
 
-  if (req.user && req.user.loggedIn) {
+    if (req.session && req.session.loggedIn === true) {
     res.json(
         {
-           userId: req.user.userId,
-           displayName: req.user.name,
+            userId:      req.session.userId,
+            displayName: req.session.name,
            loggedIn: true
         }
-    )
+    );
   } else if (req.query.userId) {
 
-    var token = {
-      pass: "",
-      expires: new Date().getTime() + 300000
-    };
-    var a = Math.round(Math.random() * 1000000000000).toString(16);
-    var hSum = crypto.createHash('sha256');
-    hSum.update(a);
-    var hash = hSum.digest('base64');
-    token.pass = hash.slice(0,6);
+        generateToken(function (token) {
 
-    // TODO Need session store implemented
-    // req.session.token = token;
+            req.session.token = token;
+            req.session.userId = req.query.userId;
+            req.session.loggedIn = false;
 
-    slackService.sendToken(req.query.userId, token);
+            slackService.sendToken(req.query.userId, token);
 
-    users[req.query.userId] = {
-      token: token
-    };
+            res.send({success: true});
+        }
+        );
 
-    res.send({ success: true});
   } else {
-    res.json({
-      success: false
-             });
+        res.json({success: false});
   }
 });
 
 router.get('/auth/:userId', function (req, res) {
 
-  var userId = req.params.userId;
+    var userId = req.params.userId;
+    var tokenSent = req.query.token || '';
 
-  if (users[req.params.userId] && users[req.params.userId].token && users[req.params.userId].token.pass == req.query.token) {
-    // /auth/USERID/?token=abcdefg
-    req.user = req.user || {};
-    req.user.loggedIn = true;
-    req.user.userId = req.params.userId;
-    console.log("User logged in successfully");
-    res.json({
-               success: true,
-               userId: req.user.userId,
-               loggedIn: true
-             })
-  } else {
-    console.log("Bad token: %s from user: %s", req.query.token, req.params.userId);
-    res.json({ success: false});
-  }
+    if (req.session.token) {
+
+        var tokenExpected = req.session.token;
+        if (tokenExpected.expires >= new Date().getTime() && req.session.userId == userId && tokenExpected.pass == tokenSent.toUpperCase()) {
+
+            req.session.userId = userId;
+            req.session.loggedIn = true;
+            req.session.name = slackUtil.getNameById(req.params.userId);
+            res.json(
+                {
+                    success:     true,
+                    displayName: req.session.name,
+                    loggedIn:    true,
+                    userId:      userId
+                }
+            );
+
+        } else {
+            res.json({success: false});
+        }
+
+    } else {
+        res.json({success: false});
+    }
 });
+
+
+/***
+ * Gernerates a token for authentication 8 letter token as token.pass and expires in 5 minutes
+ * @param callback
+ */
+function generateToken(callback) {
+
+    var token = {
+        pass:    "",
+        expires: new Date().getTime() + 300000
+    };
+    var hSum = crypto.createHash('sha256');
+
+    crypto.randomBytes(256, function (ex, buf) {
+        if (ex) {
+            var a = Math.round(Math.random() * 1000000000000).toString(16);
+            hSum.update(a);
+            console.error(ex);
+        } else {
+            hSum.update(buf);
+        }
+        var hash = hSum.digest('base64');
+        token.pass = hash.slice(0, 8).toUpperCase();
+        callback(token);
+    }
+    );
+}
 
 module.exports = router;

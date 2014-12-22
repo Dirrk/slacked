@@ -10,6 +10,7 @@ var redisStore = require('connect-redis')(session);
 var sessConfig = global.appConfig.session;
 var storeConfig = global.appConfig.store;
 
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var channel = require('./routes/channel');
@@ -30,10 +31,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 // Session store
 storeConfig.client = redisCache.client();
 sessConfig.store = new redisStore(storeConfig);
+
 app.use(session(sessConfig));
 
 
@@ -43,12 +44,14 @@ app.use('/user', users);
 app.use('/channel', channel);
 app.use('/group', group);
 
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
+
 
 // error handlers
 

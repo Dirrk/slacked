@@ -5,16 +5,18 @@
 var express = require('express');
 var router = express.Router();
 var sqlUtil = require('../lib/sqlUtil');
-var slackUtil = require('../lib/slackUtil');
 var slackService = require('../lib/slackService');
+var userAuth = require('../middleware/userAuthentication');
+
 
 // match the id first
+router.use(userAuth);
 router.get('/:id', groupHandler); // /group/id
 router.get('/', groupsHandler); // /groups
 
 function groupsHandler(req, res) {
 
-    var userId = slackUtil.getCurrentRequestingUser(req);
+    var userId = req.session.userId;
 
     // Get Cached Data
     var groups = slackService.getGroups(userId) || [];
@@ -40,7 +42,7 @@ function groupHandler(req, res) {
         locationId: req.params.id || null,
         start: req.query.start || new Date().getTime(),
         isChannel: false,
-        userId: slackUtil.getCurrentRequestingUser(req)
+        userId: req.session.userId
     };
 
     sqlUtil.getLocationHistory(config, function (err, data) {
@@ -56,13 +58,6 @@ function groupHandler(req, res) {
     });
 
 };
-
-
-function makePrettyDate(inDate) {
-
-    var aDate = new Date(inDate);
-    return (aDate.getMonth() + 1) + "/" + aDate.getDate() + "/" + aDate.getUTCFullYear() + " " + aDate.getHours() + ":" + aDate.getMinutes();
-}
 
 module.exports = router;
 
