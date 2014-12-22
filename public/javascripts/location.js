@@ -35,19 +35,6 @@
                     displayName: "Login"
                 };
 
-
-                $scope.searchData = {
-                    term:      "",
-                    startDate: new Date().getTime() - 3600000, // 1 hour
-                    endDate:   new Date().getTime(),
-                    locations: []
-                };
-
-                $scope.searchFor = function (term) {
-                    console.log(term);
-                };
-
-
                 $scope.globes = {
                     _users:    [],
                     _channels: [],
@@ -59,8 +46,7 @@
                     console.log("RootScope authenticated");
 
                     $rootScope.$broadcast("updateSideBar");
-
-                }
+                               }
                 );
 
                 $http.get("/user/auth")
@@ -73,7 +59,7 @@
                             $scope.globes._profile.userId = data.userId;
                             $scope.globes._profile.displayName = data.displayName;
 
-                            $scope.emit("authenticated");
+                            $scope.$emit("authenticated");
                             console.log($scope.globes._profile);
                             $location.path("/user");
                         } else {
@@ -107,6 +93,7 @@
                         .success(
                         function (data) {
                             $scope.channels = data;
+                            $scope.globes._channels = data;
                         }
                     );
                     // Download groups
@@ -215,8 +202,43 @@
 
         console.log("UserController");
         if ($scope.globes._profile && $scope.globes._profile.loggedIn === true) {
-            console.log("User is logged in");
-       } else {
+
+            $scope.searchData = {
+                term:                 "",
+                startDate:            new Date().getTime() - 3600000, // 1 hour
+                endDate:              new Date().getTime(),
+                locations:            [],
+                selectedLocationName: "Location",
+                selectedLocationId:   null
+            };
+
+            $('#startDate').datetimepicker(
+                {
+                    onChangeDateTime: function (time) {
+                        $scope.searchData.startDate = time.getTime();
+                        console.log("Start Date: " + $scope.searchData.startDate);
+                    }
+                }
+            );
+            $('#endDate').datetimepicker(
+                {
+                    onChangeDateTime: function (time) {
+                        $scope.searchData.startDate = time.getTime();
+                        console.log("Start Date: " + $scope.searchData.endDate);
+                    }
+                }
+            );
+
+            $scope.searchFor = function (term) {
+                console.log(term);
+            };
+            $scope.setLocation = function (location) {
+                $scope.searchData.selectedLocationName = location.name;
+                $scope.searchData.selectedLocationId = location.locationId;
+            }
+
+
+        } else {
             $location.path('/');
        }
     }]);

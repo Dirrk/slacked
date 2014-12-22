@@ -123,3 +123,7 @@ body {
 .btn-spaced {
   margin-left: 10px;
 }
+
+.dateBoxes span {
+  top: 0;
+}
