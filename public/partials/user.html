@@ -57,7 +57,12 @@
             </div>
         </div>
         <div class="row">
-            {{searchData.info}}
+            <div class="msgContainer">
+                <div class="message" ng-repeat="msg in searchData.messages">
+                    <p data-toggle="tooltip" data-placement="top" title="{{msg.date}}"> [{{msg.time}}]
+                        &lt{{msg.name}}&gt {{msg.msg}}</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>

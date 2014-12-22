@@ -1,6 +1,6 @@
 {
   "name": "slacked",
-  "version": "0.0.56",
+  "version": "0.0.66",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"

@@ -174,13 +174,22 @@
                      {
                         templateUrl: "partials/index.html",
                         controller: "indexController"
-             }).when('/search/:locationId/:query',
-                     {
-                         templateUrl: "partials/messages.html",
-                         controller: "searchController"
              }).otherwise({ redirectTo: "/" });
          }
         ]
+    );
+
+    ngLocationSlackedApp.controller('ngSearch', ["$scope", "$http", function ngMessageViewer($scope, $http) {
+
+        $scope.messages = [{ts: tsToDateString(), name: "Slacked", msg: "No messages"}];
+
+        /*
+         $scope.$on("updateMessages", function (event, args) {
+
+         });
+         */
+    }
+    ]
     );
 
 
@@ -209,7 +218,8 @@
                 endDate:              new Date().getTime(),
                 locations:            [],
                 selectedLocationName: "Location",
-                selectedLocationId:   null
+                selectedLocationId: null,
+                messages:           []
             };
 
             $('#startDate').datetimepicker(
@@ -230,7 +240,16 @@
             );
 
             $scope.searchFor = function (term) {
-                console.log(term);
+                var url = "/search/" + $scope.searchData.selectedLocationId + "?start=" + $scope.searchData.startDate + "&end=" + $scope.searchData.endDate;
+
+                $http.post(url, {query: term})
+                    .success(
+                    function (data) {
+                        if (data) {
+                            $scope.searchData.messages = cleanMessages(data);
+                        }
+                    }
+                );
             };
             $scope.setLocation = function (location) {
                 $scope.searchData.selectedLocationName = location.name;
@@ -241,10 +260,6 @@
         } else {
             $location.path('/');
        }
-    }]);
-
-    ngLocationSlackedApp.controller('searchController', ["$scope", "$http", function searchController($scope, $http) {
-
     }]);
 
     ngLocationSlackedApp.controller('indexController', ["$scope", "$routeParams", "$http", "$location", function indexController($scope, $routeParams, $http, $location) {

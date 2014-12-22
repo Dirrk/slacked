@@ -15,6 +15,7 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var channel = require('./routes/channel');
 var group = require('./routes/group');
+var search = require('./routes/search');
 
 var app = express();
 
@@ -43,6 +44,7 @@ app.use('/', routes);
 app.use('/user', users);
 app.use('/channel', channel);
 app.use('/group', group);
+app.use('/search', search);
 
 
 // catch 404 and forward to error handler
