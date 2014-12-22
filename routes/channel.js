@@ -16,7 +16,7 @@ router.get('/', channelsHandler); // /channel/
 
 function channelsHandler(req, res) {
 
-    slackService.getChannels(req.session.userId,
+    slackService.getChannelsByUserId(req.session.userId,
                              function (channels) {
                                  res.json(channels.map(function (chan) {
                                      return {locationId: chan.locationId, name: chan.name};
@@ -34,7 +34,7 @@ function channelHandler(req, res) {
         locationId: req.params.id || null,
         start: req.query.start || new Date().getTime(),
         isChannel: true,
-        userId: slackUtil.getCurrentRequestingUser(req)
+        userId: req.session.user
     };
 
     sqlUtil.getLocationHistory(config, function (err, data) {

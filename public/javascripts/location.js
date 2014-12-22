@@ -15,126 +15,157 @@
     angular.element(document.getElementsByTagName('head')).append(angular.element('<base href="' + window.location.pathname + '" />'));
 
     ngLocationSlackedApp
-        .controller("ngMainController",
-                                    ["$scope",
-                                     "$route",
-                                     "$routeParams",
-                                     "$location",
-                                     function ($scope, $route, $routeParams, $location, $http) {
-                                         $scope.$route = $route;
-                                         $scope.$location = $location;
-                                         $scope.$routeParams = $routeParams;
+        .controller(
+        "ngMainController",
+        [
+            "$scope",
+            "$route",
+            "$routeParams",
+            "$location",
+            "$http",
+            "$rootScope",
+            function ($scope, $route, $routeParams, $location, $http, $rootScope) {
+                $scope.$route = $route;
+                $scope.$location = $location;
+                $scope.$routeParams = $routeParams;
 
-                                         var user = {
-                                             loggedIn: false,
-                                             userId: null,
-                                             displayName: "Login"
-                                         };
-
-
-                                         $scope.searchData = {
-                                             term: "",
-                                             startDate: new Date().getTime() - 3600000, // 1 hour
-                                             endDate: new Date().getTime(),
-                                             locations: []
-                                         };
-
-                                         $scope.searchFor = function(term) {
-                                             console.log(term);
-                                         };
+                var user = {
+                    loggedIn:    false,
+                    userId:      window.localStorage.getItem("slacked:user_selected"),
+                    displayName: "Login"
+                };
 
 
-                                         $scope.globes = {
-                                           _users: [],
-                                           _channels: [],
-                                           _groups: [],
-                                           _profile: user
-                                         };
+                $scope.searchData = {
+                    term:      "",
+                    startDate: new Date().getTime() - 3600000, // 1 hour
+                    endDate:   new Date().getTime(),
+                    locations: []
+                };
+
+                $scope.searchFor = function (term) {
+                    console.log(term);
+                };
 
 
+                $scope.globes = {
+                    _users:    [],
+                    _channels: [],
+                    _groups:   [],
+                    _profile:  user
+                };
 
-                                         // $http.get("/user")
+                $rootScope.$on("authenticated", function (event, args) {
+                    console.log("RootScope authenticated");
 
-                                     }
-                                    ]
+                    $rootScope.$broadcast("updateSideBar");
+
+                }
+                );
+
+                $http.get("/user/auth")
+                    .success(
+                    function (data) {
+                        if (data && data.success) {
+                            console.log("Success /user/auth");
+                            console.log(data);
+                            $scope.globes._profile.loggedIn = data.loggedIn;
+                            $scope.globes._profile.userId = data.userId;
+                            $scope.globes._profile.displayName = data.displayName;
+
+                            $scope.emit("authenticated");
+                            console.log($scope.globes._profile);
+                            $location.path("/user");
+                        } else {
+                            console.log("Error /user/auth");
+                            console.log(data);
+                        }
+                    }
+                );
+
+
+            }
+        ]
     );
 
-    ngLocationSlackedApp.controller('ngSidebarController',
-                                    ["$scope",
-                                     "$http",
-                                     function ngSidebarController($scope, $http) {
+    ngLocationSlackedApp.controller(
+        'ngSidebarController',
+        [
+            "$scope",
+            "$http",
+            "$rootScope",
+            function ngSidebarController($scope, $http, $rootScope) {
 
-                                         $scope.channels = DEFAULT_CHANNELS;
-                                         $scope.groups = DEFAULT_GROUPS;
-                                         $scope.loadChannel = function (isChannel, id) { // for testing
-                                             if (isChannel == true) {
-                                                 console.log("Channel");
-                                             }
-                                             console.log(id);
-                                         };
+                $scope.channels = DEFAULT_CHANNELS;
+                $scope.groups = DEFAULT_GROUPS;
 
-                                         // Download channels
-                                         $http.get('/channel')
-                                             .success(
-                                             function (data) {
-                                                 $scope.channels = data;
-                                                 $scope.globes._channels = data;
-                                             }
-                                         ).error(
-                                             function (data, status) {
-                                                 console.log("Couldn't retrieve channels. status: " + status);
-                                                 console.log(data);
-                                             }
-                                         );
-                                         // Download groups
-                                         $http.get('/group')
-                                             .success(
-                                             function (data) {
-                                                 $scope.groups = data;
-                                                 $scope.globes._groups = data;
-                                             }
-                                         )
-                                             .error(
-                                             function (data, status) {
+                function refresh() {
 
-                                                 console.log("Couldn't retrieve groups. status: " + status);
-                                                 console.log(data);
-                                             }
-                                         );
+                    console.log("Refreshing sidebar");
+                    // Download channels
+                    $http.get('/channel')
+                        .success(
+                        function (data) {
+                            $scope.channels = data;
+                        }
+                    );
+                    // Download groups
+                    $http.get('/group')
+                        .success(
+                        function (data) {
+                            $scope.groups = data;
+                            $scope.globes._groups = data;
+                        }
+                    );
+                }
 
+                $scope.refresh = refresh;
+                refresh();
 
-                                     }
-                                    ]
+                $scope.$on("updateSideBar", function () {
+                    console.log("Recieved updateSideBar from root");
+                    $scope.refresh();
+                }
+                );
+
+            }
+        ]
     );
 
     /**
      * Controller for HistoryController (messages)
      */
-    ngLocationSlackedApp.controller('locationHistoryController', ["$scope", "$routeParams", "$http",
-                                                                  function locationHistoryController($scope,
-                                                                                                     $routeParams,
-                                                                                                     $http) {
+    ngLocationSlackedApp.controller(
+        'locationHistoryController',
+        [
+            "$scope",
+            "$routeParams",
+            "$http",
 
-                                                                      console.log("Inside LocationHistoryController");
-                                                                      console.log($routeParams);
-                                                                      $scope.params = $routeParams;
-                                                                      $scope.locationType = $routeParams.locationType;
-                                                                      $scope.locationId = $routeParams.locationId;
-                                                                      $scope.messages = DEFAULT_MESSAGES;
-                                                                      $scope.lastStamp = 0;
-                                                                      $http.get(makeUrl($scope.params))
-                                                                          .success(
-                                                                          function (data) {
-                                                                              $scope.messages = cleanMessages(data) || cleanMessages(DEFAULT_MESSAGES);
-                                                                              $scope.lastStamp = $scope.messages[$scope.messages.length - 1].msgStamp;
-                                                                          }
-                                                                      ).error(
-                                                                          function (data) {
-                                                                              console.log(data || "No data");
-                                                                              $scope.messages = cleanMessages(ERROR_MESSAGE);
-                                                                          }
-                                                                      );
-                                                                  }
+            function locationHistoryController($scope,
+                                               $routeParams,
+                                               $http) {
+
+                console.log("Inside LocationHistoryController");
+                console.log($routeParams);
+                $scope.params = $routeParams;
+                $scope.locationType = $routeParams.locationType;
+                $scope.locationId = $routeParams.locationId;
+                $scope.messages = DEFAULT_MESSAGES;
+                $scope.lastStamp = 0;
+                $http.get(makeUrl($scope.params))
+                    .success(
+                    function (data) {
+                        $scope.messages = cleanMessages(data) || cleanMessages(DEFAULT_MESSAGES);
+                        $scope.lastStamp = $scope.messages[$scope.messages.length - 1].msgStamp;
+                    }
+                ).error(
+                    function (data) {
+                        console.log(data || "No data");
+                        $scope.messages = cleanMessages(ERROR_MESSAGE);
+                    }
+                );
+            }
     ]
     );
 
@@ -182,11 +213,11 @@
 
     ngLocationSlackedApp.controller('userController', ["$scope", "$routeParams", "$http", "$location", function userController($scope, $routeParams, $http, $location) {
 
-       if ($scope.user && $scope.user.loggedIn === true) {
-            console.log("user is logged in");
-
+        console.log("UserController");
+        if ($scope.globes._profile && $scope.globes._profile.loggedIn === true) {
+            console.log("User is logged in");
        } else {
-           $location.path('/?action=login');
+            $location.path('/');
        }
     }]);
 
@@ -212,10 +243,10 @@
             };
 
             var lastSelected = window.localStorage.getItem("slacked:user_selected");
+
             if (lastSelected) {
                 $scope.authData.selectedUser = lastSelected;
             }
-
 
             // Setup chosen input box
             $("#userDropDown").chosen({allow_single_deselect: false, disable_search_threshold: 5, width: "275px", placeholder_text_single: "Select user"});
@@ -229,7 +260,7 @@
 
             $scope.startAuthProcess = function() {
                 $scope.globes._profile.userId = $scope.authData.selectedUser;
-                console.log("Begging auth process");
+                console.log("Starting auth process");
 
                 $http.get('/user/auth?userId=' + $scope.globes._profile.userId).
                     success(
@@ -259,7 +290,7 @@
                 var token = token || $scope.authData.token;
                 if (token && token.length > 0) {
 
-                    $http.get("/user/auth/" + $scope.globes._profile.userId + "?token=" + token)
+                    $http.post("/user/auth/" + $scope.globes._profile.userId, {token: token})
                         .success(
                             function (data) {
                                 if (data && data.success == true) {
@@ -267,7 +298,10 @@
                                     $scope.token = "";
                                     $scope.globes._profile.userId = data.userId;
                                     $scope.globes._profile.loggedIn = true;
-                                    $scope.globes._profile.displayName = "blah"; // TODO FIX
+                                    $scope.globes._profile.displayName = data.displayName;
+                                    console.log("I logged in here!!");
+                                    $scope.$emit("authenticated");
+                                    $location.path("/user/");
                                 }
                             }
                     );
@@ -281,7 +315,7 @@
             $http.get("/user/")
                 .success(
                 function (data) {
-                    console.log("Users: ", data);
+
                     $scope.allUsers = data;
                     $scope.globes._users = data;
                     setTimeout(function () {

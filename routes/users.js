@@ -19,15 +19,17 @@ router.get('/auth', function(req, res) {
     if (req.session && req.session.loggedIn === true) {
     res.json(
         {
+            success:  true,
             userId:      req.session.userId,
             displayName: req.session.name,
-           loggedIn: true
+            loggedIn: true
         }
     );
   } else if (req.query.userId) {
 
         generateToken(function (token) {
 
+            console.log("Generated token %s for user %s", token.pass, req.query.userId);
             req.session.token = token;
             req.session.userId = req.query.userId;
             req.session.loggedIn = false;
@@ -43,10 +45,10 @@ router.get('/auth', function(req, res) {
   }
 });
 
-router.get('/auth/:userId', function (req, res) {
+router.all('/auth/:userId', function (req, res) {
 
     var userId = req.params.userId;
-    var tokenSent = req.query.token || '';
+    var tokenSent = req.query.token || req.body.token || '';
 
     if (req.session.token) {
 
@@ -66,6 +68,13 @@ router.get('/auth/:userId', function (req, res) {
             );
 
         } else {
+            console.log("%s :: User: %s was denied access when trying token %s against %s that expires %s",
+                        new Date().toLocaleString(),
+                        userId,
+                        tokenSent,
+                        tokenExpected.pass,
+                        new Date(tokenExpected.expires).toLocaleString()
+            );
             res.json({success: false});
         }
 
