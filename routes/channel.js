@@ -6,7 +6,7 @@ var express = require('express');
 var router = express.Router();
 var sqlUtil = require('../lib/sqlUtil');
 var slackUtil = require('../lib/slackUtil');
-var slackService = require('../lib/slackService');
+var slackService = require('../lib/slackService/v1/slackService');
 var userAuth = require('../middleware/userAuthentication');
 
 
