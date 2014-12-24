@@ -1,8 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var sqlUtil = require('../lib/sqlUtil');
-var slackUtil = require('../lib/slackUtil');
-var slackService = require('../lib/slackService/v1/slackService');
+var httpHelper = require('../lib/httpHelper');
 var crypto = require('crypto');
 
 // TEMP FOR TESTING ONLY
@@ -10,7 +8,14 @@ var users = [];
 
 /* GET users listing. */
 router.get('/', function(req, res) {
-  res.json(slackService.getUsers());
+
+    httpHelper.getUsers(function (err, users) {
+        if (err || !users || !users.length) {
+            res.json([]);
+        } else {
+            res.json(users);
+        }
+    });
 });
 
 
@@ -34,7 +39,7 @@ router.get('/auth', function(req, res) {
             req.session.userId = req.query.userId;
             req.session.loggedIn = false;
 
-            slackService.sendToken(req.query.userId, token);
+            httpHelper.sendToken(req.query.userId, token);
 
             res.send({success: true});
         }
@@ -57,15 +62,24 @@ router.all('/auth/:userId', function (req, res) {
 
             req.session.userId = userId;
             req.session.loggedIn = true;
-            req.session.name = slackUtil.getNameById(req.params.userId);
-            res.json(
-                {
-                    success:     true,
-                    displayName: req.session.name,
-                    loggedIn:    true,
-                    userId:      userId
+            req.session.name = "";
+
+            httpHelper.getUserById(userId, function (err, user) {
+
+                if (!err && user) {
+                    req.session.name = user.name;
+                    req.session.channels = user.channels;
+                    req.session.groups = user.groups;
                 }
-            );
+                res.json(
+                    {
+                        success:     true,
+                        displayName: req.session.name,
+                        loggedIn:    true,
+                        userId:      userId
+                    }
+                );
+            });
 
         } else {
             console.log("%s :: User: %s was denied access when trying token %s against %s that expires %s",

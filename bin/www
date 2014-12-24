@@ -29,7 +29,6 @@ var redisCache = require('../lib/redisCache');
 redisCache.start();
 
 
-
 var app = require('../app');
 
 
@@ -39,6 +38,7 @@ if (appArgs.p) {
 } else {
   app.set('port', 3000);
 }
+
 
 // Start services
 // Web Service
