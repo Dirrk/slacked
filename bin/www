@@ -26,10 +26,8 @@ if (appArgs.c) {
 
 // Services
 var redisCache = require('../lib/redisCache');
-var slackService = require('../lib/slackService/v1/slackService');
-
 redisCache.start();
-slackService.start();
+
 
 
 var app = require('../app');
