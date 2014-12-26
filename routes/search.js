@@ -19,7 +19,7 @@ function searchHandler(req, res, next) {
     var endDate = req.query.end || 4389369600000;
     var query = req.body.query;
     var userId = req.session.userId;
-    var page = req.query.page || 1;
+    var page = parseInt(req.query.page) || 1;
 
     var options = {
 

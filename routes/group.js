@@ -25,7 +25,7 @@ function groupHandler(req, res) {
     var startDate = req.query.start || 0;
     var endDate = req.query.end || 4389369600000;
     var userId = req.session.userId;
-    var page = req.query.page || 1;
+    var page = parseInt(req.query.page) || 1;
 
     var options = {
 

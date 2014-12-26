@@ -25,6 +25,7 @@
             "$http",
             "$rootScope",
             function ($scope, $route, $routeParams, $location, $http, $rootScope) {
+
                 $scope.$route = $route;
                 $scope.$location = $location;
                 $scope.$routeParams = $routeParams;
@@ -32,20 +33,22 @@
                 var user = {
                     loggedIn:    false,
                     userId:      window.localStorage.getItem("slacked:user_selected"),
-                    displayName: "Login"
+                    displayName: "Login",
+                    channels: [],
+                    groups: []
                 };
 
-                $scope.globes = {
-                    _users:    [],
-                    _channels: [],
-                    _groups:   [],
-                    _profile:  user
-                };
+                $rootScope.users = {};
+                $rootScope.user = user;
+                $rootScope.channels = [];
+                $rootScope.groups = [];
+                $scope.user = $rootScope.user;
 
-                $rootScope.$on("authenticated", function (event, args) {
-                    console.log("RootScope authenticated");
+                $rootScope.$on("authenticated",
+                               function (event, args) {
 
-                    $rootScope.$broadcast("updateSideBar");
+                                   console.log("RootScope authenticated");
+                                   $rootScope.$broadcast("updateSideBar", args);
                                }
                 );
 
@@ -55,12 +58,12 @@
                         if (data && data.success) {
                             console.log("Success /user/auth");
                             console.log(data);
-                            $scope.globes._profile.loggedIn = data.loggedIn;
-                            $scope.globes._profile.userId = data.userId;
-                            $scope.globes._profile.displayName = data.displayName;
+                            $rootScope.user.loggedIn = data.loggedIn;
+                            $rootScope.user.userId = data.userId;
+                            $rootScope.user.displayName = data.displayName;
 
                             $scope.$emit("authenticated");
-                            console.log($scope.globes._profile);
+                            console.log($rootScope.user);
                             $location.path("/user");
                         } else {
                             console.log("Error /user/auth");
@@ -92,20 +95,23 @@
                     $http.get('/channel')
                         .success(
                         function (data) {
-                            $scope.channels = data;
-                            $scope.globes._channels = data;
+                            if (data && data.success) {
+                                $scope.channels = data.locations;
+                                $rootScope.user.channels = data.locations;
+                            }
                         }
                     );
                     // Download groups
                     $http.get('/group')
                         .success(
                         function (data) {
-                            $scope.groups = data;
-                            $scope.globes._groups = data;
+                            if (data && data.success) {
+                                $scope.groups = data.locations;
+                                $rootScope.user.groups = data.locations;
+                            }
                         }
                     );
                 }
-
                 $scope.refresh = refresh;
                 refresh();
 
@@ -128,23 +134,29 @@
             "$scope",
             "$routeParams",
             "$http",
+            "$rootScope",
 
             function locationHistoryController($scope,
                                                $routeParams,
-                                               $http) {
+                                               $http,
+                                               $rootScope) {
 
                 console.log("Inside LocationHistoryController");
                 console.log($routeParams);
+                var aPage = 0;
                 $scope.params = $routeParams;
                 $scope.locationType = $routeParams.locationType;
                 $scope.locationId = $routeParams.locationId;
-                $scope.messages = DEFAULT_MESSAGES;
-                $scope.lastStamp = 0;
-                $http.get(makeUrl($scope.params))
+                $scope.messages = cleanMessages(DEFAULT_MESSAGES);
+                $scope.currentPage = parseInt($routeParams.page) || 1;
+
+                $http.get(makeUrl($routeParams, $scope.currentPage))
                     .success(
                     function (data) {
-                        $scope.messages = cleanMessages(data) || cleanMessages(DEFAULT_MESSAGES);
-                        $scope.lastStamp = $scope.messages[$scope.messages.length - 1].msgStamp;
+                        $scope.messages = cleanMessages(data.data) || cleanMessages(DEFAULT_MESSAGES);
+                        aPage = parseInt(data.page);
+                        aPage++;
+                        $scope.nextPage = aPage;
                     }
                 ).error(
                     function (data) {
@@ -207,10 +219,10 @@
          */
     }]);
 
-    ngLocationSlackedApp.controller('userController', ["$scope", "$routeParams", "$http", "$location", function userController($scope, $routeParams, $http, $location) {
+    ngLocationSlackedApp.controller('userController', ["$scope", "$routeParams", "$http", "$location", "$rootScope", function userController($scope, $routeParams, $http, $location, $rootScope) {
 
         console.log("UserController");
-        if ($scope.globes._profile && $scope.globes._profile.loggedIn === true) {
+        if ($rootScope.user && $rootScope.user.loggedIn === true) {
 
             $scope.searchData = {
                 term:                 "",
@@ -262,10 +274,10 @@
        }
     }]);
 
-    ngLocationSlackedApp.controller('indexController', ["$scope", "$routeParams", "$http", "$location", function indexController($scope, $routeParams, $http, $location) {
+    ngLocationSlackedApp.controller('indexController', ["$scope", "$routeParams", "$http", "$location", "$rootScope", function indexController($scope, $routeParams, $http, $location, $rootScope) {
 
         // user is logged in load user page instead of the login / sign up page
-        if ($scope.globes._profile && $scope.globes._profile.loggedIn === true) {
+        if ($rootScope.user && $rootScope.user.loggedIn === true) {
             console.log("redirecting user to '/user'");
             $location.path('/user');
 
@@ -276,7 +288,7 @@
                 token: "",
                 step2: false,
                 timedWait: false,
-                selectedUser: $scope.globes._profile.userId
+                selectedUser: $rootScope.user.userId
             };
 
             var lastSelected = window.localStorage.getItem("slacked:user_selected");
@@ -296,10 +308,10 @@
             });
 
             $scope.startAuthProcess = function() {
-                $scope.globes._profile.userId = $scope.authData.selectedUser;
+                $rootScope.user.userId = $scope.authData.selectedUser;
                 console.log("Starting auth process");
 
-                $http.get('/user/auth?userId=' + $scope.globes._profile.userId).
+                $http.get('/user/auth?userId=' + $rootScope.user.userId).
                     success(
                     function (data) {
                         if (data && data.success === true) {
@@ -327,15 +339,15 @@
                 var token = token || $scope.authData.token;
                 if (token && token.length > 0) {
 
-                    $http.post("/user/auth/" + $scope.globes._profile.userId, {token: token})
+                    $http.post("/user/auth/" + $rootScope.user.userId, {token: token})
                         .success(
                             function (data) {
                                 if (data && data.success == true) {
 
                                     $scope.token = "";
-                                    $scope.globes._profile.userId = data.userId;
-                                    $scope.globes._profile.loggedIn = true;
-                                    $scope.globes._profile.displayName = data.displayName;
+                                    $rootScope.user.userId = data.userId;
+                                    $rootScope.user.loggedIn = true;
+                                    $rootScope.user.displayName = data.displayName;
                                     console.log("I logged in here!!");
                                     $scope.$emit("authenticated");
                                     $location.path("/user/");
@@ -354,7 +366,7 @@
                 function (data) {
 
                     $scope.allUsers = data;
-                    $scope.globes._users = data;
+                    $rootScope.users = data;
                     setTimeout(function () {
 
                         $("#userDropDown").trigger("chosen:updated");
@@ -393,17 +405,15 @@
      * @param param { locationType: "channel | group", locationId: "CXXXXXXX | GXXXXXXX" }
      * @returns {string}
      */
-    function makeUrl(param) {
+    function makeUrl(param, page) {
         // :locationType/:locationId
+        var url = "";
         if (!param.locationType) {
             param.locationType = "channel";
         }
-        if (param.start == 0 || param.start == "0" || param.start == null) {
-            return "/" + param.locationType + "/" + param.locationId;
-        }
-        return "/" + param.locationType + "/" + param.locationId + "?start=" + param.start;
+        url = "/" + param.locationType + "/" + param.locationId + "?page=" + page;
+        return url;
     }
-
 
     /***
      * tsToDateString
