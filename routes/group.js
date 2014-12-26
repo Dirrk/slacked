@@ -4,8 +4,7 @@
 
 var express = require('express');
 var router = express.Router();
-var sqlUtil = require('../lib/sqlUtil');
-var slackService = require('../lib/slackService/v1/slackService');
+var httpHelper = require('../lib/httpHelper');
 var userAuth = require('../middleware/userAuthentication');
 
 
@@ -16,44 +15,48 @@ router.get('/', groupsHandler); // /groups
 
 function groupsHandler(req, res) {
 
-    var userId = req.session.userId;
-
-    // Get Cached Data
-    var groups = slackService.getGroups(userId) || [];
-
-    // If no data try refreshing
-    if (groups || groups.length == 0) {
-
-        // Using callback queries most current data
-        slackService.getGroups(userId, function (data) {
-            res.json(data || []);
-        });
-
-    } else {
-        res.json(groups);
-    }
+    res.json({ success: true, groups: req.session.groups || []});
 
 };
 
 function groupHandler(req, res) {
 
+    var location = req.params.locationId;
+    var startDate = req.query.start || 0;
+    var endDate = req.query.end || 4389369600000;
+    var userId = req.session.userId;
+    var page = req.query.page || 1;
 
-    var config = {
-        locationId: req.params.id || null,
-        start: req.query.start || new Date().getTime(),
-        isChannel: false,
-        userId: req.session.userId
+    var options = {
+
+        userId: userId,
+        locationId: location,
+        startDate: startDate,
+        endDate: endDate,
+        page: page
     };
 
-    sqlUtil.getLocationHistory(config, function (err, data) {
+    httpHelper.locationHistory(options, function (results) {
 
-        if (data) {
-            res.json(data);
-        } else {
-            if (err) {
-                console.error(err);
+        var ret = JSON.parse(JSON.stringify(options));
+        if (results && results.length) {
+
+            var pageStart = (page - 1) * 50;
+            var pageEnd = (page) * 50;
+            if (pageEnd > results.length) {
+                pageEnd = results.length;
             }
-            res.json([])
+            if (pageStart > results.length) {
+                pageStart = 0;
+            }
+            ret.success = true;
+            ret.data = results.slice(pageStart, pageEnd);
+            res.json(ret);
+
+        } else {
+            ret.success = false;
+            ret.data = [];
+            res.json(ret);
         }
     });
 
