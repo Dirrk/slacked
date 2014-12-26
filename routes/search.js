@@ -19,23 +19,41 @@ function searchHandler(req, res, next) {
     var endDate = req.query.end || new Date().getTime();
     var query = req.body.query;
     var userId = req.session.userId;
+    var page = req.query.page || 1;
 
-    httpHelper.verifyAccess(req.session.channels, req.session.groups, location);
+    var options = {
 
-    slackUtil.verifyUserHasAccess(userId, location, function (hasAccess) {
-        if (hasAccess) {
+        userId: userId,
+        locationId: location,
+        startDate: startDate,
+        endDate: endDate,
+        query: query,
+        page: page
+    };
 
+    httpHelper.locationHistory(options, function (results) {
 
-            sqlUtil.search(startDate, endDate, location, query, function (results) {
-                res.json(results);
+        var ret = JSON.parse(JSON.stringify(options));
+        if (results && results.length) {
+
+            var pageStart = (page - 1) * 50;
+            var pageEnd = (page) * 50;
+            if (pageEnd > results.length) {
+                pageEnd = results.length;
             }
-            );
+            if (pageStart > results.length) {
+                pageStart = 0;
+            }
+            ret.success = true;
+            ret.data = results.slice(pageStart, pageEnd);
+            res.json(ret);
 
         } else {
-            next(new Error("No access"));
+            ret.success = false;
+            ret.data = [];
+            res.json(ret);
         }
-    }
-    );
+    });
 }
 
 module.exports = router;
