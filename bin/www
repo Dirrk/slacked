@@ -1,52 +1,17 @@
 #!/usr/bin/env node
-var appArgs = require('minimist')(process.argv.slice(2));
-var fs = require('fs');
-global.appConfig = {};
 
+var config = require('../lib/config');
 
-// Setup config
-// This is ugly needs changing
-if (appArgs.c) {
-  try {
-    global.appConfig = require(appArgs.c);
-  } catch (e) {
-    try {
-      global.appConfig = require('../config.json');
-    } catch (e) {
-      global.appConfig = {"port": 3000, "debug": true, "token": "", redis: {}};
-    }
-  }
-} else {
-  try {
-    global.appConfig = require('../config.json');
-  } catch (e) {
-    global.appConfig = {"port": 3000, "debug": true, "token": "", redis: {}};
-  }
-}
+config.www(function (settings) {
 
-// Services
-var redisCache = require('../lib/redisCache');
-redisCache.start();
+  var app = require('../app');
 
+  app.set('token', settings.token);
 
-var app = require('../app');
+  var server = app.listen(settings.port, function() {
+    console.log('Express server listening on port ' + server.address().port);
+  });
 
-
-// Setup custom modules
-if (appArgs.p) {
-  app.set('port', appArgs.port || appArgs.p);
-} else {
-  app.set('port', 3000);
-}
-
-
-// Start services
-// Web Service
-var server = app.listen(app.get('port'), function() {
-  console.log('Express server listening on port ' + server.address().port);
 });
 
-// Testing Services
-var sqlUtil = require('../lib/sqlUtil');
-sqlUtil.testSQL();
-redisCache.test();
+
