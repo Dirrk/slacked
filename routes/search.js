@@ -4,8 +4,7 @@
 
 var express = require('express');
 var router = express.Router();
-var sqlUtil = require('../lib/sqlUtil');
-var slackUtil = require('../lib/slackUtil');
+var httpHelper = require('../lib/httpHelper');
 var userAuth = require('../middleware/userAuthentication');
 
 
@@ -20,6 +19,8 @@ function searchHandler(req, res, next) {
     var endDate = req.query.end || new Date().getTime();
     var query = req.body.query;
     var userId = req.session.userId;
+
+    httpHelper.verifyAccess(req.session.channels, req.session.groups, location);
 
     slackUtil.verifyUserHasAccess(userId, location, function (hasAccess) {
         if (hasAccess) {

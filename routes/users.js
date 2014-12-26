@@ -68,8 +68,8 @@ router.all('/auth/:userId', function (req, res) {
 
                 if (!err && user) {
                     req.session.name = user.name;
-                    req.session.channels = user.channels;
-                    req.session.groups = user.groups;
+                    req.session.channels = user.channels || [];
+                    req.session.groups = user.groups || [];
                 }
                 res.json(
                     {
