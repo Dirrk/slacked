@@ -45,6 +45,7 @@ function searchHandler(req, res, next) {
                 pageStart = 0;
             }
             ret.success = true;
+            ret.total = results.length;
             ret.data = results.slice(pageStart, pageEnd);
             res.json(ret);
 

@@ -14,7 +14,7 @@ router.get('/', channelsHandler); // /channel/
 
 function channelsHandler(req, res) {
 
-    res.json({ success: true, groups: req.session.channels || []});
+    res.json({ success: true, locations: req.session.channels || []});
 
 };
 
@@ -49,6 +49,7 @@ function channelHandler(req, res) {
                 pageStart = 0;
             }
             ret.success = true;
+            ret.total = results.length;
             ret.data = results.slice(pageStart, pageEnd);
             res.json(ret);
 

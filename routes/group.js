@@ -15,7 +15,7 @@ router.get('/', groupsHandler); // /groups
 
 function groupsHandler(req, res) {
 
-    res.json({ success: true, groups: req.session.groups || []});
+    res.json({ success: true, locations: req.session.groups || []});
 
 };
 
@@ -50,6 +50,7 @@ function groupHandler(req, res) {
                 pageStart = 0;
             }
             ret.success = true;
+            ret.total = results.length;
             ret.data = results.slice(pageStart, pageEnd);
             res.json(ret);
 

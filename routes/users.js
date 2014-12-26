@@ -3,17 +3,15 @@ var router = express.Router();
 var httpHelper = require('../lib/httpHelper');
 var crypto = require('crypto');
 
-// TEMP FOR TESTING ONLY
-var users = [];
 
 /* GET users listing. */
 router.get('/', function(req, res) {
 
     httpHelper.getUsers(function (err, users) {
         if (err || !users || !users.length) {
-            res.json([]);
+            res.json({ success: false, users: []});
         } else {
-            res.json(users);
+            res.json({ success: true, users: users});
         }
     });
 });
