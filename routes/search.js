@@ -9,7 +9,7 @@ var userAuth = require('../middleware/userAuthentication');
 
 
 router.use(userAuth);
-router.post('/:locationId', httpHelper.searchRouteHandler); // /search/location
+router.post('/:id', httpHelper.searchRouteHandler); // /search/location
 
 
 module.exports = router;
