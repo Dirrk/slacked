@@ -21,8 +21,8 @@ function channelsHandler(req, res) {
 function channelHandler(req, res) {
 
     var location = req.params.id;
-    var startDate = req.query.start || 0;
-    var endDate = req.query.end || 4389369600000;
+    var startDate = parseInt(req.query.start) || 0;
+    var endDate = parseInt(req.query.end) || 4389369600000;
     var userId = req.session.userId;
     var page = parseInt(req.query.page) || 1;
 

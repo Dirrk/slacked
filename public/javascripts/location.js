@@ -186,22 +186,73 @@
                      {
                         templateUrl: "partials/index.html",
                         controller: "indexController"
+             }).when('/search',
+                     {
+                         templateUrl: "partials/search.html",
+                         controller: "ngSearchController"
              }).otherwise({ redirectTo: "/" });
          }
         ]
     );
 
-    ngLocationSlackedApp.controller('ngSearch', ["$scope", "$http", function ngMessageViewer($scope, $http) {
+    ngLocationSlackedApp.controller(
+        'ngSearchController',
+        [
+            "$scope",
+            "$http",
+            "$rootScope",
+            function ngMessageViewer(
+                $scope,
+                $http,
+                $rootScope) {
 
-        $scope.messages = [{ts: tsToDateString(), name: "Slacked", msg: "No messages"}];
+                $scope.searchData = {
+                    term:                 "",
+                    startDate:            new Date().getTime() - 3600000, // 1 hour
+                    endDate:              new Date().getTime(),
+                    locations:            [],
+                    selectedLocationName: "Location",
+                    selectedLocationId: null,
+                    messages:           []
+                };
 
-        /*
-         $scope.$on("updateMessages", function (event, args) {
+                $('#startDate').datetimepicker(
+                    {
+                        onChangeDateTime: function (time) {
+                            $scope.searchData.startDate = time.getTime();
+                            console.log("Start Date: " + $scope.searchData.startDate);
+                        }
+                    }
+                );
+                $('#endDate').datetimepicker(
+                    {
+                        onChangeDateTime: function (time) {
+                            $scope.searchData.endDate = time.getTime();
+                            console.log("Start Date: " + $scope.searchData.endDate);
+                        }
+                    }
+                );
+                $scope.channels = $rootScope.user.channels;
+                $scope.groups = $rootScope.user.groups;
 
-         });
-         */
-    }
-    ]
+                $scope.searchFor = function (term) {
+                    var url = "/search/" + $scope.searchData.selectedLocationId + "?start=" + $scope.searchData.startDate + "&end=" + $scope.searchData.endDate;
+
+                    $http.post(url, {query: term})
+                        .success(
+                        function (data) {
+                            if (data && data.success) {
+                                $scope.searchData.messages = cleanMessages(data.data);
+                            }
+                        }
+                    );
+                };
+                $scope.setLocation = function (location) {
+                    $scope.searchData.selectedLocationName = location.name;
+                    $scope.searchData.selectedLocationId = location.locationId;
+                };
+            }
+        ]
     );
 
 
@@ -223,50 +274,6 @@
 
         console.log("UserController");
         if ($rootScope.user && $rootScope.user.loggedIn === true) {
-
-            $scope.searchData = {
-                term:                 "",
-                startDate:            new Date().getTime() - 3600000, // 1 hour
-                endDate:              new Date().getTime(),
-                locations:            [],
-                selectedLocationName: "Location",
-                selectedLocationId: null,
-                messages:           []
-            };
-
-            $('#startDate').datetimepicker(
-                {
-                    onChangeDateTime: function (time) {
-                        $scope.searchData.startDate = time.getTime();
-                        console.log("Start Date: " + $scope.searchData.startDate);
-                    }
-                }
-            );
-            $('#endDate').datetimepicker(
-                {
-                    onChangeDateTime: function (time) {
-                        $scope.searchData.startDate = time.getTime();
-                        console.log("Start Date: " + $scope.searchData.endDate);
-                    }
-                }
-            );
-
-            $scope.searchFor = function (term) {
-                var url = "/search/" + $scope.searchData.selectedLocationId + "?start=" + $scope.searchData.startDate + "&end=" + $scope.searchData.endDate;
-
-                $http.post(url, {query: term})
-                    .success(
-                    function (data) {
-                        if (data) {
-                            $scope.searchData.messages = cleanMessages(data);
-                        }
-                    }
-                );
-            };
-            $scope.setLocation = function (location) {
-                $scope.searchData.selectedLocationName = location.name;
-                $scope.searchData.selectedLocationId = location.locationId;
-            }
 
 
         } else {

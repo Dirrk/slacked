@@ -15,8 +15,8 @@ router.post('/:locationId', searchHandler); // /search/location
 function searchHandler(req, res, next) {
 
     var location = req.params.locationId;
-    var startDate = req.query.start || 0;
-    var endDate = req.query.end || 4389369600000;
+    var startDate = parseInt(req.query.start) || 0;
+    var endDate = parseInt(req.query.end) || 4389369600000;
     var query = req.body.query;
     var userId = req.session.userId;
     var page = parseInt(req.query.page) || 1;
