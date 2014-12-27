@@ -1,4 +1,61 @@
 <div class="container-fluid">
-    Hello User
-
+    <div class="row">
+        <div class="col-md-11">
+            <div class="jumbotron">
+                <h2>Welcome {{user.displayName}}!</h2>
+                <p>
+                    This application has the ability to log any channel/private group the bot is in plus perform simple tasks via commands
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-10">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        Subscribe to more channels:
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-10" id="subscribeGroup">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <select id="channelMulti" class="chosen-select" ng-options="item.name as item.name for item in allChannels" ng-model="subscribeData.selectedChannels" multiple>
+                                        <option></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button ng-click="subscribeToChannels()" class="btn btn-primary btn-sm btn-spaced">Join</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-12" ng-hide="alert.hide">
+                            <div class="alert" ng-class="alert.type" role="alert">
+                                <span class="glyphicon" ng-class="alert.icon"></span>
+                                {{alert.message}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <h6>Commands</h6>
+            <div class="list-group">
+                <div class="list-group-item" ng-repeat="command in commands">
+                    <h5 class="list-group-item-heading">{{command.msg}}</h5>
+                    <p class="list-group-item-text">
+                        {{command.desc}}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

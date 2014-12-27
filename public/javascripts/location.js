@@ -256,29 +256,68 @@
     );
 
 
-    /***
-     * Not used yet
-     */
-    ngLocationSlackedApp.controller('ngMessageViewer', ["$scope", "$http", function ngMessageViewer($scope, $http) {
-
-        $scope.messages = [{ts: tsToDateString(), name: "Slacked", msg: "No messages"}];
-
-        /*
-         $scope.$on("updateMessages", function (event, args) {
-
-         });
-         */
-    }]);
-
     ngLocationSlackedApp.controller('userController', ["$scope", "$routeParams", "$http", "$location", "$rootScope", function userController($scope, $routeParams, $http, $location, $rootScope) {
 
-        console.log("UserController");
-        if ($rootScope.user && $rootScope.user.loggedIn === true) {
+        $scope.commands = [{ msg: "!join CHANNEL", desc: "Messaging the bot will force the bot to join the channel<br>Example: !join #general"}];
+        $scope.subscribeData = {
+            selectedChannels: null
+        };
+        // channelMulti
+        $("#channelMulti").chosen({ width: "100%"});
 
+        $http.get("/channel/all")
+            .success(
+            function (data) {
 
-        } else {
-            $location.path('/');
-       }
+                $scope.allChannels = data.channels;
+                $rootScope.channels = data.channels;
+                setTimeout(function () {
+                    $("#channelMulti").trigger("chosen:updated");
+                }, 250);
+            }
+        );
+        $scope.alert = {
+            hide: true,
+            type: "alert-success",
+            message: "this works",
+            close: function () {
+                $scope.alert.hide = true;
+                $scope.$apply();
+            }
+        };
+
+        $scope.subscribeToChannels = function () {
+            var chans = $scope.subscribeData.selectedChannels;
+            console.log(chans);
+            $http.post('/channel/', { channels: chans} )
+                .success(
+                function (data) {
+                    if (data && data.success) {
+                        $scope.alert.hide = false;
+                        $scope.alert.type = "alert-success";
+                        $scope.alert.icon = "glyphicon-ok-circle";
+                        $scope.alert.message = "Successfully subscribed to those channels";
+                        setTimeout(function () {
+                           $scope.alert.hide = true;
+                            $scope.$apply();
+                        }, 2500);
+                    }
+                }
+
+            ).error(
+                function (data) {
+                   console.log(data);
+                    $scope.alert.hide = false;
+                    $scope.alert.type = "alert-danger";
+                    $scope.alert.icon = "glyphicon-exclamation-sign";
+                    $scope.alert.message = "Unable to subscribe to channels";
+                    setTimeout(function () {
+                        $scope.alert.hide = true;
+                        $scope.$apply();
+                    }, 2500);
+                }
+            );
+        }
     }]);
 
     ngLocationSlackedApp.controller('indexController', ["$scope", "$routeParams", "$http", "$location", "$rootScope", function indexController($scope, $routeParams, $http, $location, $rootScope) {
