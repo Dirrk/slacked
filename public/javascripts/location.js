@@ -372,8 +372,8 @@
                 .success(
                 function (data) {
 
-                    $scope.allUsers = data;
-                    $rootScope.users = data;
+                    $scope.allUsers = data.users;
+                    $rootScope.users = data.users;
                     setTimeout(function () {
 
                         $("#userDropDown").trigger("chosen:updated");
