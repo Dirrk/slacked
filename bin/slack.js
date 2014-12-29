@@ -6,9 +6,25 @@ var config = require('../lib/config');
 
 config.slack(function (settings) {
 
-    var slackService = require('../lib/slackService/v2/slackService');
+    var d = require('domain').create();
+    var slackService = require('../lib/slackService/v3/slackService');
+    var slack;
 
-    slackService.start(settings.token);
+    d.on('error', function (err) {
+        console.error(err);
+        try {
+            slack = {};
+        } catch (err) {
+            console.error("Couldn't even delete object");
+            console.error(err);
+        } finally {
+            slack = new slackService();
+            d.add(slack);
+        }
+    });
+    d.run(function () {
+        slack = new slackService();
+    });
 });
 
 
