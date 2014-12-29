@@ -15,8 +15,7 @@ router.get('/', groupsHandler); // /groups
 
 function groupsHandler(req, res) {
 
-
-    if (req.query.force == true) {
+    if (req.query.force == 'true' || req.query.force == true) {
         httpHelper.getUserById(req.session.userId, function (err, user) {
             if (!err) {
                 req.session.groups = user.groups || res.session.groups || [];

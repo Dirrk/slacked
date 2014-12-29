@@ -48,6 +48,7 @@
                                function (event, args) {
 
                                    console.log("RootScope authenticated");
+                                   console.log(args);
                                    $rootScope.$broadcast("updateSideBar", args);
                                }
                 );
@@ -92,7 +93,7 @@
 
                     console.log("Refreshing sidebar");
                     // Download channels
-                    if (!force !== true) {
+                    if (force !== true) {
                         force = false;
                     } else {
                         force = true;
@@ -120,11 +121,12 @@
                     );
                 }
                 $scope.refresh = refresh;
-                refresh();
+                refresh(true);
 
-                $scope.$on("updateSideBar", function (force) {
+                $scope.$on("updateSideBar", function (event, args) {
                     console.log("Recieved updateSideBar from root");
-                    $scope.refresh(force);
+                    console.log(args);
+                    $scope.refresh(args);
                 }
                 );
 
@@ -305,6 +307,11 @@
                 $scope.alert.hide = true;
                 $scope.$apply();
             }
+        };
+
+        $scope.forceRefresh = function () {
+            console.log("Forced refresh");
+           $rootScope.$emit("authenticated", true);
         };
 
         $scope.subscribeToChannels = function () {

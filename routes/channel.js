@@ -17,7 +17,8 @@ router.post('/', subscribeToChannels);
 
 function channelsHandler(req, res) {
 
-    if (req.query.force == true) {
+
+    if (req.query.force == 'true' || req.query.force == true) {
         httpHelper.getUserById(req.session.userId, function (err, user) {
             if (!err) {
                 req.session.channels = user.channels || res.session.channels || [];
