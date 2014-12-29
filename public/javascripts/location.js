@@ -88,11 +88,18 @@
                 $scope.channels = DEFAULT_CHANNELS;
                 $scope.groups = DEFAULT_GROUPS;
 
-                function refresh() {
+                function refresh(force) {
 
                     console.log("Refreshing sidebar");
                     // Download channels
-                    $http.get('/channel')
+                    if (!force !== true) {
+                        force = false;
+                    } else {
+                        force = true;
+                    }
+                    console.log("Force: " + force);
+
+                    $http.get('/channel?force=' + force)
                         .success(
                         function (data) {
                             if (data && data.success) {
@@ -102,7 +109,7 @@
                         }
                     );
                     // Download groups
-                    $http.get('/group')
+                    $http.get('/group?force=' + force)
                         .success(
                         function (data) {
                             if (data && data.success) {
@@ -115,9 +122,9 @@
                 $scope.refresh = refresh;
                 refresh();
 
-                $scope.$on("updateSideBar", function () {
+                $scope.$on("updateSideBar", function (force) {
                     console.log("Recieved updateSideBar from root");
-                    $scope.refresh();
+                    $scope.refresh(force);
                 }
                 );
 

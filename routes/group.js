@@ -15,7 +15,17 @@ router.get('/', groupsHandler); // /groups
 
 function groupsHandler(req, res) {
 
-    res.json({ success: true, locations: req.session.groups || []});
+
+    if (req.query.force == true) {
+        httpHelper.getUserById(req.session.userId, function (err, user) {
+            if (!err) {
+                req.session.groups = user.groups || res.session.groups || [];
+            }
+            res.json({ success: true, locations: req.session.groups || []});
+        })
+    } else {
+        res.json({ success: true, locations: req.session.groups || []});
+    }
 
 };
 
