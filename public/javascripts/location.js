@@ -135,11 +135,16 @@
             "$routeParams",
             "$http",
             "$rootScope",
-
+            "$location",
             function locationHistoryController($scope,
                                                $routeParams,
                                                $http,
-                                               $rootScope) {
+                                               $rootScope,
+                                               $location) {
+
+                if (!$rootScope.user || $rootScope.user.loggedIn !== true) {
+                    $location.path('/');
+                }
 
                 console.log("Inside LocationHistoryController");
                 console.log($routeParams);
@@ -201,10 +206,16 @@
             "$scope",
             "$http",
             "$rootScope",
-            function ngMessageViewer(
+            "$location",
+            function ngSearchController(
                 $scope,
                 $http,
-                $rootScope) {
+                $rootScope,
+                $location) {
+
+                if (!$rootScope.user || $rootScope.user.loggedIn !== true) {
+                    $location.path('/');
+                }
 
                 $scope.searchData = {
                     term:                 "",
@@ -258,6 +269,9 @@
 
     ngLocationSlackedApp.controller('userController', ["$scope", "$routeParams", "$http", "$location", "$rootScope", function userController($scope, $routeParams, $http, $location, $rootScope) {
 
+        if (!$rootScope.user || $rootScope.user.loggedIn !== true) {
+            $location.path('/');
+        }
         $scope.commands = [{ msg: "!join CHANNEL", desc: "Messaging the bot will force the bot to join the channel<br>Example: !join #general"}];
         $scope.subscribeData = {
             selectedChannels: null
