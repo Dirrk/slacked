@@ -161,13 +161,13 @@
                 $scope.params = $routeParams;
                 $scope.locationType = $routeParams.locationType;
                 $scope.locationId = $routeParams.locationId;
-                $scope.messages = cleanMessages(DEFAULT_MESSAGES);
+                $scope.messages = DEFAULT_MESSAGES;
                 $scope.currentPage = parseInt($routeParams.page) || 1;
 
                 $http.get(makeUrl($routeParams, $scope.currentPage))
                     .success(
                     function (data) {
-                        $scope.messages = cleanMessages(data.data) || cleanMessages(DEFAULT_MESSAGES);
+                        $scope.messages = cleanMessages(data.data) || DEFAULT_MESSAGES;
                         aPage = parseInt(data.page);
                         aPage++;
                         $scope.nextPage = aPage;
@@ -459,18 +459,27 @@
      */
     function cleanMessages(data) {
 
+        var ret = {};
+        // { dateId: "20141228" dateString: "December 28, 2014" messages: [] }
+
         if (data && data.length && data.length > 0) {
 
             for (var i = 0; i < data.length; i++) {
                 var tmp = tsToDateString(data[i].msgStamp);
-                data[i].date = tmp.date;
+                data[i].date = tmp.dateString;
                 data[i].time = tmp.time;
-
+                if (ret[tmp.dateId]) {
+                    ret[tmp.dateId].messages.unshift(data[i]);
+                } else {
+                    ret[tmp.dateId] = { dateId: tmp.dateId, dateString: tmp.dateString, messages: [data[i]] };
+                }
             }
-            console.log(data);
-            return data;
-        } else {
-            return cleanMessages(DEFAULT_MESSAGES);
+            var sending = hashToArray(ret);
+            sending.total = data.length;
+            console.log(sending);
+            return sending.sort(function (a, b) {
+                return b.dateId - a.dateId;
+            });
         }
     }
 
@@ -500,7 +509,56 @@
         if (id && typeof id == "number") {
             tmp = new Date(id);
         }
-        return {date: tmp.toLocaleDateString(), time: tmp.toLocaleTimeString()};
+        var dateString = "";
+        switch (tmp.getMonth()) {
+            case (0):
+                dateString = "January";
+                break;
+            case (1):
+                dateString = "February";
+                break;
+            case (2):
+                dateString = "March";
+                break;
+            case (3):
+                dateString = "April";
+                break;
+            case (4):
+                dateString = "May";
+                break;
+            case (5):
+                dateString = "June";
+                break;
+            case (6):
+                dateString = "July";
+                break;
+            case (7):
+                dateString = "August";
+                break;
+            case (8):
+                dateString = "September";
+                break;
+            case (9):
+                dateString = "October";
+                break;
+            case (10):
+                dateString = "November";
+                break;
+            case (11):
+                dateString = "December";
+                break;
+        }
+        dateString += " " + tmp.getDate() + ", " + tmp.getFullYear();
+        return {dateId: tmp.getFullYear().toString() + (tmp.getMonth() + 1).toString() + (tmp.getDate().toString()), dateString: dateString, time: tmp.toLocaleTimeString()};
     }
+    function hashToArray(obj) {
+        var keys = Object.keys(obj) || [];
+        var ret = [];
+        for (var i = 0; i < keys.length; i++)
+        {
+            ret.push(obj[keys[i]]);
+        }
+        return ret;
+    };
 
 })(window.angular);
