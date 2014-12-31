@@ -47,7 +47,7 @@
         </div>
         <div class="row">
             <div class="msgContainer">
-                <div class="message" ng-repeat="msg in messages">
+                <div class="message" ng-repeat="msg in searchData.messages">
                     <p class="dateInMessages"><strong>{{msg.dateString}}</strong></p>
                     <p data-toggle="tooltip" data-placement="top" title="{{msg.dateString}}" ng-repeat="msgs in msg.messages"> [{{msgs.time}}] &lt{{msgs.name}}&gt {{msgs.msg}}</p>
                 </div>
