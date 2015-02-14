@@ -16,6 +16,7 @@ var users = require('./routes/users');
 var channel = require('./routes/channel');
 var group = require('./routes/group');
 var search = require('./routes/search');
+var history = require('./routes/history');
 
 var app = express();
 
@@ -45,6 +46,7 @@ app.use('/user', users);
 app.use('/channel', channel);
 app.use('/group', group);
 app.use('/search', search);
+app.use('/history', history);
 
 
 // catch 404 and forward to error handler

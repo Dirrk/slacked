@@ -19,7 +19,7 @@ html(ng-app="ngLocationSlackedApp")
       script(src="/javascripts/jquery.datetimepicker.js")
 
       if debugSite == true
-         script(src="/javascripts/test.js")
+         script(src="/javascripts/test/test.js")
       else
          script(src="/javascripts/location.js")
 
@@ -31,9 +31,9 @@ html(ng-app="ngLocationSlackedApp")
                a.navbar-brand(href="/#/") Slacked
             ul.nav.navbar-nav.navbar-right
                li
-                  a(href="/#/search") Search
+                  a(href="#/search") Search
                li
-                  a(href="/#/user") {{user.displayName}}
+                  a(href="#/user") {{user.displayName}}
 
       .container-fluid
          .row

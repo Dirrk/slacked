@@ -3,15 +3,15 @@
         <div class="row">
             <div class="col-md-2">
                 <div class="input-group dateBoxes">
-                    <input id="startDate" ng-model="searchData.startDateObj" type="text" class="form-control">
-                    <span class="input-group-addon glyphicon glyphicon-calendar">
+                    <input id="startDate" type="text" class="form-control">
+                    <span class="input-group-addon glyphicon glyphicon-calendar" onclick="$('#startDate').datetimepicker('show')">
                     </span>
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="input-group dateBoxes">
-                    <input id="endDate" ng-model="searchData.endDateObj" type="text" class="form-control">
-                    <span class="input-group-addon glyphicon glyphicon-calendar">
+                    <input id="endDate" type="text" class="form-control">
+                    <span class="input-group-addon glyphicon glyphicon-calendar" onclick="$('#endDate').datetimepicker('show')">
                     </span>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                     <div class="input-group">
                         <input class="form-control" type="text" placeholder="slacked" ng-model="searchData.term">
                         <span class="input-group-btn">
-                            <button class="btn btn-primary" type="submit" ng-click="searchFor(searchData.term)">Search
+                            <button class="btn btn-primary" type="submit" ng-click="searchFor()">Search
                             </button>
                         </span>
                     </div>
@@ -51,8 +51,8 @@
                     <p class="dateInMessages"><strong>{{msg.dateString}}</strong></p>
                     <p data-toggle="tooltip" data-placement="top" title="{{msg.dateString}}" ng-repeat="msgs in msg.messages"> [{{msgs.time}}] &lt{{msgs.name}}&gt {{msgs.msg}}</p>
                 </div>
-                <div class="message" ng-if="messages.total > 49">
-                    <a href="#/history/{{locationType}}/{{locationId}}?page={{nextPage}}">
+                <div class="message" ng-if="searchData.isMore">
+                    <a ng-click="searchFor(searchData.nextDate)">
                         Load next page
                     </a>
                 </div>

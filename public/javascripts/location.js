@@ -29,6 +29,8 @@
                 $scope.$route = $route;
                 $scope.$location = $location;
                 $scope.$routeParams = $routeParams;
+                $scope.startPage = $location.path();
+                $scope.startTime = new Date().getTime();
 
                 var user = {
                     loggedIn:    false,
@@ -50,6 +52,9 @@
                                    console.log("RootScope authenticated");
                                    console.log(args);
                                    $rootScope.$broadcast("updateSideBar", args);
+                                   if (($scope.startTime + 2000 < new Date().getTime())) { // If on refresh the user is authenticated load the page they requested instead
+                                       $location.path($scope.startPage);
+                                   }
                                }
                 );
 
@@ -65,7 +70,7 @@
 
                             $scope.$emit("authenticated");
                             console.log($rootScope.user);
-                            $location.path("/user");
+                            $location.path($scope.startPage || "/user");
                         } else {
                             console.log("Error /user/auth");
                             console.log(data);
@@ -216,28 +221,45 @@
             "$http",
             "$rootScope",
             "$location",
+            "$routeParams",
             function ngSearchController(
                 $scope,
                 $http,
                 $rootScope,
-                $location) {
+                $location,
+                $routeParams) {
 
                 if (!$rootScope.user || $rootScope.user.loggedIn !== true) {
                     $location.path('/');
                 }
 
                 $scope.searchData = {
-                    term:                 "",
+                    term:                 $routeParams.query || "",
                     startDate:            new Date().getTime() - 3600000, // 1 hour
                     endDate:              new Date().getTime(),
                     locations:            [],
                     selectedLocationName: "Location",
-                    selectedLocationId: null,
-                    messages:           []
+                    selectedLocationId: $routeParams.locationId || null,
+                    messages:           [],
+                    total: 0,
+                    isMore: false,
+                    nextDate: 0
                 };
+                if ($routeParams.startDate) {
+                    $scope.searchData.startDate = parseInt($routeParams.startDate);
+                }
+                if ($routeParams.endDate) {
+                    $scope.searchData.startDate = parseInt($routeParams.endDate);
+                }
+                var sDate = new Date($scope.searchData.startDate);
+                var startValue = sDate.getFullYear() + "/" + (sDate.getMonth() + 1) + "/" + sDate.getDate() + " " + sDate.getHours() + ":" + sDate.getMinutes();
+                var eDate = new Date($scope.searchData.endDate);
+                var endValue = eDate.getFullYear() + "/" + (eDate.getMonth() + 1) + "/" + eDate.getDate() + " " + eDate.getHours() + ":" + eDate.getMinutes();
 
                 $('#startDate').datetimepicker(
                     {
+                        value: startValue,
+                        format: 'Y/m/d H:i',
                         onChangeDateTime: function (time) {
                             $scope.searchData.startDate = time.getTime();
                             console.log("Start Date: " + $scope.searchData.startDate);
@@ -246,26 +268,59 @@
                 );
                 $('#endDate').datetimepicker(
                     {
+                        value: endValue,
+                        format: 'Y/m/d H:i',
                         onChangeDateTime: function (time) {
                             $scope.searchData.endDate = time.getTime();
-                            console.log("Start Date: " + $scope.searchData.endDate);
+                            console.log("End Date: " + $scope.searchData.endDate);
                         }
                     }
                 );
                 $scope.channels = $rootScope.user.channels;
                 $scope.groups = $rootScope.user.groups;
 
-                $scope.searchFor = function (term) {
-                    var url = "/search/" + $scope.searchData.selectedLocationId + "?start=" + $scope.searchData.startDate + "&end=" + $scope.searchData.endDate;
+                $scope.searchFor = function (endDate) {
 
-                    $http.post(url, {query: term})
+                    var httpRequest = {
+
+                        url: "/history/" + $scope.searchData.selectedLocationId,
+                        method: "GET",
+                        params: {
+                            start: $scope.searchData.startDate,
+                            end: endDate || $scope.searchData.endDate,
+                            query: $scope.searchData.term
+                        }
+                    };
+                    console.log("Searching for stuff");
+                    console.log(httpRequest);
+                    $http(httpRequest).success(
+                      function (data) {
+
+                          if (data && data.success) {
+                              $scope.searchData.isMore = data.isMore;
+                              $scope.searchData.nextDate = data.nextDate;
+                              $scope.searchData.total = data.total;
+                              $scope.searchData.messages = cleanMessages(data.data);
+                          }
+                      }
+                    );
+
+
+
+
+                    // var url = "/history/" + $scope.searchData.selectedLocationId;
+
+                    /* $http.post(url, { query: term } )
                         .success(
                         function (data) {
                             if (data && data.success) {
+                                $scope.searchData.isMore = data.isMore;
+                                $scope.searchData.nextDate = data.nextDate;
+                                $scope.searchData.total = data.total;
                                 $scope.searchData.messages = cleanMessages(data.data);
                             }
                         }
-                    );
+                    ); */
                 };
                 $scope.setLocation = function (location) {
                     $scope.searchData.selectedLocationName = location.name;
@@ -442,7 +497,6 @@
                     $scope.allUsers = data.users;
                     $rootScope.users = data.users;
                     setTimeout(function () {
-
                         $("#userDropDown").trigger("chosen:updated");
                     }, 250);
                 }
@@ -469,7 +523,7 @@
                 data[i].date = tmp.dateString;
                 data[i].time = tmp.time;
                 if (ret[tmp.dateId]) {
-                    ret[tmp.dateId].messages.unshift(data[i]);
+                    ret[tmp.dateId].messages.push(data[i]);
                 } else {
                     ret[tmp.dateId] = { dateId: tmp.dateId, dateString: tmp.dateString, messages: [data[i]] };
                 }
