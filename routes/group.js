@@ -10,7 +10,6 @@ var userAuth = require('../middleware/userAuthentication');
 
 // match the id first
 router.use(userAuth);
-router.get('/:id', httpHelper.searchRouteHandler); // /group/id
 router.get('/', groupsHandler); // /groups
 
 function groupsHandler(req, res) {

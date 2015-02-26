@@ -11,7 +11,6 @@ var async = require('async');
 
 router.use(userAuth);
 router.get('/all', getAllChannels);
-router.get('/:id', httpHelper.searchRouteHandler); // /channel/id
 router.get('/', channelsHandler); // /channel/
 router.post('/', subscribeToChannels);
 

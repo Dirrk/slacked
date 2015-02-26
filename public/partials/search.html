@@ -52,7 +52,7 @@
                     <p data-toggle="tooltip" data-placement="top" title="{{msg.dateString}}" ng-repeat="msgs in msg.messages"> [{{msgs.time}}] &lt{{msgs.name}}&gt {{msgs.msg}}</p>
                 </div>
                 <div class="message" ng-if="searchData.isMore">
-                    <a ng-click="searchFor(searchData.nextDate)">
+                    <a ng-click="searchFor(searchData.nextDate)" href="">
                         Load next page
                     </a>
                 </div>

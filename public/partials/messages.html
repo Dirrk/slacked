@@ -5,7 +5,7 @@
             <p data-toggle="tooltip" data-placement="top" title="{{msg.dateString}}" ng-repeat="msgs in msg.messages"> [{{msgs.time}}] &lt{{msgs.name}}&gt {{msgs.msg}}</p>
         </div>
         <div class="message" ng-if="historyData.isMore">
-            <a ng-click="loadPage(historyData.nextDate)">
+            <a ng-click="loadPage(historyData.nextDate)" href="">
                 Load next page
             </a>
         </div>
