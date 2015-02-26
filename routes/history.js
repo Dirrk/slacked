@@ -8,7 +8,7 @@ var router = express.Router();
 var httpHelper = require('../lib/httpHelper');
 var userAuth = require('../middleware/userAuthentication');
 var util = require('util');
-var DEFAULT_PAGE_SIZE = 50;
+var DEFAULT_PAGE_SIZE = 25;
 
 router.use(userAuth);
 router.get('/:id', historyRoute); // /history/location
@@ -24,7 +24,7 @@ function historyRoute(req, res, next) {
         startDate: 0,
         endDate: 4389369600000,
         query: null,
-        pageSize: DEFAULT_PAGE_SIZE,
+        pageSize: req.session.pageSize || DEFAULT_PAGE_SIZE,
         users: []
     };
     if (!options.userId || !options.userId.length || options.userId.length < 8 || !options.locationId || !options.locationId.length || options.locationId.length < 8) {
