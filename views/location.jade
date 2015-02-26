@@ -41,12 +41,12 @@ html(ng-app="ngLocationSlackedApp")
                h6 Channels
                ul#chanSideBar.nav.nav-sidebar
                   li(ng-repeat="chan in channels")
-                     a(href="#/history/channel/{{chan.locationId}}") {{chan.name}}
+                     a(href="#/history/{{chan.locationId}}") {{chan.name}}
                br
                h6 Groups
                ul#groupSideBar.nav.nav-sidebar
                   li(ng-repeat="group in groups")
-                     a(href="#/history/group/{{group.locationId}}") {{group.name}}
+                     a(href="#/history/{{group.locationId}}") {{group.name}}
 
             .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
                .container-fluid(ng-view)

@@ -1,13 +1,13 @@
 <div class="container-fluid">
-   <div class="msgContainer">
-      <div class="message" ng-repeat="msg in messages">
-         <p class="dateInMessages"><strong>{{msg.dateString}}</strong></p>
-         <p data-toggle="tooltip" data-placement="top" title="{{msg.dateString}}" ng-repeat="msgs in msg.messages"> [{{msgs.time}}] &lt{{msgs.name}}&gt {{msgs.msg}}</p>
-      </div>
-      <div class="message" ng-if="messages.total > 49">
-         <a href="#/history/{{locationType}}/{{locationId}}?page={{nextPage}}">
-            Load next page
-         </a>
-      </div>
-   </div>
+    <div class="msgContainer">
+        <div class="message" ng-repeat="msg in historyData.messages">
+            <p class="dateInMessages"><strong>{{msg.dateString}}</strong></p>
+            <p data-toggle="tooltip" data-placement="top" title="{{msg.dateString}}" ng-repeat="msgs in msg.messages"> [{{msgs.time}}] &lt{{msgs.name}}&gt {{msgs.msg}}</p>
+        </div>
+        <div class="message" ng-if="historyData.isMore">
+            <a ng-click="loadPage(historyData.nextDate)">
+                Load next page
+            </a>
+        </div>
+    </div>
 </div>

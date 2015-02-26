@@ -83,6 +83,9 @@
         ]
     );
 
+    /**
+     *  Sidebar Controller
+     */
     ngLocationSlackedApp.controller(
         'ngSidebarController',
         [
@@ -150,39 +153,47 @@
             "$http",
             "$rootScope",
             "$location",
-            function locationHistoryController($scope,
-                                               $routeParams,
-                                               $http,
-                                               $rootScope,
-                                               $location) {
+            function locationHistoryController($scope, $routeParams, $http, $rootScope, $location) {
 
                 if (!$rootScope.user || $rootScope.user.loggedIn !== true) {
                     $location.path('/');
                 }
 
                 console.log("Inside LocationHistoryController");
-                console.log($routeParams);
-                var aPage = 0;
-                $scope.params = $routeParams;
-                $scope.locationType = $routeParams.locationType;
-                $scope.locationId = $routeParams.locationId;
-                $scope.messages = DEFAULT_MESSAGES;
-                $scope.currentPage = parseInt($routeParams.page) || 1;
 
-                $http.get(makeUrl($routeParams, $scope.currentPage))
-                    .success(
-                    function (data) {
-                        $scope.messages = cleanMessages(data.data) || DEFAULT_MESSAGES;
-                        aPage = parseInt(data.page);
-                        aPage++;
-                        $scope.nextPage = aPage;
-                    }
-                ).error(
-                    function (data) {
-                        console.log(data || "No data");
-                        $scope.messages = cleanMessages(ERROR_MESSAGE);
-                    }
-                );
+                $scope.historyData = {
+                    startDate:            0,
+                    endDate:              4389369600000,
+                    messages:           [],
+                    total: 0,
+                    isMore: false,
+                    nextDate: 0
+                };
+
+                $scope.loadPage = function loadPage(nextDate) {
+
+                    var httpRequest = {
+                        url: "/history/" +  $routeParams.locationId,
+                        method: "GET",
+                        params: {
+                            start: $scope.historyData.startDate,
+                            end: nextDate || $scope.historyData.endDate
+                        }
+                    };
+
+                    $http(httpRequest)
+                        .success(
+                        function (data) {
+                            if (data && data.success) {
+                                $scope.historyData.isMore = data.isMore;
+                                $scope.historyData.nextDate = data.nextDate;
+                                $scope.historyData.total = data.total;
+                                $scope.historyData.messages = cleanMessages(data.data);
+                            }
+                        }
+                    );
+                };
+                $scope.loadPage()
             }
     ]
     );
@@ -194,7 +205,7 @@
         ['$routeProvider',
          function ($routeProvider) {
              $routeProvider.
-                 when('/history/:locationType/:locationId', {
+                 when('/history/:locationId', {
                           templateUrl: "partials/messages.html",
                           controller:  "locationHistoryController"
                       }
@@ -214,6 +225,9 @@
         ]
     );
 
+    /**
+     * Search Controller
+     **/
     ngLocationSlackedApp.controller(
         'ngSearchController',
         [
@@ -330,8 +344,18 @@
         ]
     );
 
-
-    ngLocationSlackedApp.controller('userController', ["$scope", "$routeParams", "$http", "$location", "$rootScope", function userController($scope, $routeParams, $http, $location, $rootScope) {
+    /**
+     *  User Controller
+     */
+    ngLocationSlackedApp.controller(
+        'userController',
+        [
+            "$scope",
+            "$routeParams",
+            "$http",
+            "$location",
+            "$rootScope",
+            function userController($scope, $routeParams, $http, $location, $rootScope) {
 
         if (!$rootScope.user || $rootScope.user.loggedIn !== true) {
             $location.path('/');
@@ -403,7 +427,18 @@
         }
     }]);
 
-    ngLocationSlackedApp.controller('indexController', ["$scope", "$routeParams", "$http", "$location", "$rootScope", function indexController($scope, $routeParams, $http, $location, $rootScope) {
+    /**
+     *  Index Controller (first page hit before login)
+     */
+    ngLocationSlackedApp.controller(
+        'indexController',
+        [
+            "$scope",
+            "$routeParams",
+            "$http",
+            "$location",
+            "$rootScope",
+            function indexController($scope, $routeParams, $http, $location, $rootScope) {
 
         // user is logged in load user page instead of the login / sign up page
         if ($rootScope.user && $rootScope.user.loggedIn === true) {
@@ -604,7 +639,14 @@
         }
         dateString += " " + tmp.getDate() + ", " + tmp.getFullYear();
         return {dateId: tmp.getFullYear().toString() + (tmp.getMonth() + 1).toString() + (tmp.getDate().toString()), dateString: dateString, time: tmp.toLocaleTimeString()};
-    }
+    };
+
+
+    /***
+     * Convert Hash To Array
+     * @param obj
+     * @returns {Array}
+     */
     function hashToArray(obj) {
         var keys = Object.keys(obj) || [];
         var ret = [];
