@@ -18,10 +18,7 @@ html(ng-app="ngLocationSlackedApp")
       script(src="/javascripts/chosen.jquery.min.js")
       script(src="/javascripts/jquery.datetimepicker.js")
 
-      if debugSite == true
-         script(src="/javascripts/test/test.js")
-      else
-         script(src="/javascripts/location.js")
+      script(src="/javascripts/location.js")
 
 
    body(ng-controller="ngMainController")
@@ -51,8 +48,3 @@ html(ng-app="ngLocationSlackedApp")
             .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
                .container-fluid(ng-view)
          #hiddenDiv(style="display: none;", data-user="{{user.userId}}")
-            //
-               .container-fluid(ng-controller="ngMessageViewer")
-                  .msgContainer
-                     .message(ng-repeat="msg in messages")
-                        p [{{msg.ts}}] &lt{{msg.name}}&gt {{msg.msg}}

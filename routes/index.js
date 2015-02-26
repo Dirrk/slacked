@@ -10,6 +10,7 @@ router.get('/', function(req, res) {
     res.render('location');
 });
 
-router.get('/debug', function(req, res) {
-    res.render('location', { debugSite: true });
+router.get('/logout', function (req, res) {
+    req.session.destroy();
+    res.redirect('/')
 });

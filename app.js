@@ -1,6 +1,5 @@
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -15,7 +14,6 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var channel = require('./routes/channel');
 var group = require('./routes/group');
-var search = require('./routes/search');
 var history = require('./routes/history');
 
 var app = express();
@@ -25,8 +23,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('trust proxy', 1);
 
-// uncomment after placing your favicon in /public
-// app.use(favicon(__dirname + '/public/favicon.ico'));
+// Setup External Middleware
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -45,7 +42,6 @@ app.use('/', routes);
 app.use('/user', users);
 app.use('/channel', channel);
 app.use('/group', group);
-app.use('/search', search);
 app.use('/history', history);
 
 
