@@ -1,0 +1,42 @@
+{
+  "port": 3000,
+  "debug": true,
+  "token": "SLACK_TOKEN",
+  "session": {
+    "secret": "PASSWORD",
+    "name": "slacked.sid",
+    "resave": false,
+    "saveUninitialized": true,
+    "rolling": true,
+    "proxy": true,
+    "cookie": {
+      "path": "/",
+      "httpOnly": true,
+      "maxAge": 86400000
+    }
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "options": {
+      "return_buffers": false,
+      "detect_buffers": false,
+      "connect_timeout": 300000,
+      "max_attempts": 1000,
+      "enable_offline_queue": true,
+      "auth_pass": "REDISPASSWORD"
+    }
+  },
+  "store": {
+    "ttl": 86400,
+    "prefix": "slacked-session:"
+  },
+  "mysql": {
+    "database": "slacked",
+    "connectionLimit": 10,
+    "host": "localhost",
+    "user": "slacked",
+    "password": "MYSQL_PASSWORD"
+  },
+  "plugins": []
+}
